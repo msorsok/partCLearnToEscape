@@ -29,7 +29,7 @@ public class MyAIController extends CarController{
 	private WorldSpatial.Direction previousState = null; // Keeps track of the previous state
 	
 	// Car Speed to move at
-	private final float CAR_SPEED = 0.5f;
+	private final float CAR_SPEED = 3f;
 	
 	// Offset used to differentiate between 0 and 360 degrees
 	private int EAST_THRESHOLD = 3;
@@ -45,18 +45,20 @@ public class MyAIController extends CarController{
 		System.out.println(delta);
 		HashMap<Coordinate, MapTile> currentView = getView();
 		updateMap(currentView);
-		Coordinate src = new Coordinate((int)getX(), (int)getY());
-		Coordinate dest = getDestination(getReachable(src), src);
-		System.out.println(dest);
-		System.out.println(map.get(dest).getType());
+		Coordinate src = new Coordinate(getPosition());
+		Coordinate dest;
+		if (getDestKey() != null){
+			dest = getDestKey();
+		}
+		else{
+			dest = getDestination(getReachable(src), src);
+		}
+		
 		if(getSpeed() < CAR_SPEED){
 			applyForwardAcceleration();
 		}
 		
-		ArrayList<Coordinate> path = findPath(src, dest);
-		path.remove(0);
-
-		System.out.println(path);
+		ArrayList<Coordinate> path = findPath(src, dest);		
 		ArrayList<Float> destCoordinates  = adjustAwayFromWall(path.get(0));
 		System.out.println(path.get(0));
 		System.out.println(destCoordinates);
@@ -121,25 +123,25 @@ public class MyAIController extends CarController{
 				case EAST:
 					newCoordinate = new Coordinate(c.x + 1, c.y);
 					if(map.get(newCoordinate).getType() == MapTile.Type.WALL){
-						newX-=0.25;
+						newX-=0.5;
 					}
 					break;
 				case WEST:
 					newCoordinate = new Coordinate(c.x - 1, c.y);
 					if(map.get(newCoordinate).getType() == MapTile.Type.WALL){
-						newX+=0.25;
+						newX+=0.5;
 					}
 					break;
 				case NORTH:
 					newCoordinate = new Coordinate(c.x, c.y + 1);
 					if(map.get(newCoordinate).getType() == MapTile.Type.WALL){
-						newY-=0.25;
+						newY-=0.5;
 					}
 					break;
 				case SOUTH:
 					newCoordinate = new Coordinate(c.x, c.y - 1);
 					if(map.get(newCoordinate).getType() == MapTile.Type.WALL){
-						newY+=0.25;
+						newY+=0.5;
 					}
 					break;
 				default:
@@ -227,7 +229,7 @@ public class MyAIController extends CarController{
 		}
 	}
 	
-	private Coordinate getKey(){
+	private Coordinate getDestKey(){
 		HashMap<Coordinate, MapTile> currentView = getView();
 		Coordinate dest = null;
 		for (Coordinate c: currentView.keySet()){
@@ -272,6 +274,9 @@ public class MyAIController extends CarController{
 					openHashMap.put(succ.coordinate, succ);
 				}					
 				if (succ.getCostFromStart() > openHashMap.get(succ.coordinate).getCostFromStart()){
+					continue;
+				}
+				if (closedHashMap.containsKey(succ.coordinate) && succ.getCostFromStart() > closedHashMap.get(succ.coordinate).getCostFromStart()){
 					continue;
 				}
 				open.remove(openHashMap.get(succ.coordinate));

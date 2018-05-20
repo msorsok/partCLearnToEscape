@@ -107,8 +107,7 @@ public class AStarNode extends Node{
 			path.add(0, curr.coordinate);
 			curr = curr.pathParent;
 		}
-		//System.out.print("A star node removed: ");
-		//System.out.println(path.remove(0));
+		path.remove(0);
 		return path;
 	}
 }

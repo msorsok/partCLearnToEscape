@@ -43,10 +43,15 @@ public class MyAIController extends CarController{
 	public void update(float delta) {
 		HashMap<Coordinate, MapTile> currentView = getView();
 		updateMap(currentView);
-		Coordinate dest = getDest();
+		Coordinate dest = new Coordinate(4,4);
 		if(getSpeed() < CAR_SPEED){
 			applyForwardAcceleration();
 		}
+		
+		System.out.println(findPath(new Coordinate((int)getX(), (int)getY()), dest));
+		
+		
+		
 		if (dest != null){
 			double destAngle = Math.toDegrees(Math.atan((dest.y - getY())/(dest.x - getX())));
 			if (destAngle<0){
@@ -107,36 +112,42 @@ public class MyAIController extends CarController{
 	private ArrayList<Coordinate> findPath(Coordinate src, Coordinate dest){
 		ArrayList<AStarNode> path = new ArrayList<>();
 		ArrayList<AStarNode> open = new ArrayList<>();
-		ArrayList<AStarNode> closed = new ArrayList<>();
-		AStarNode root = new AStarNode(src, null, 0, dest);
+		HashMap<Coordinate, AStarNode> openHashMap = new HashMap<>();
+		HashMap<Coordinate, AStarNode> closedHashMap = new HashMap<>();
+		
+		AStarNode root = new AStarNode(map, src, null, 0, dest);
 		AStarNode curr;
 		open.add(root);
+		openHashMap.put(src, root);
+		
 		while(!open.isEmpty()){
 			open.sort(AStarNode.NodeComparator);
 			curr = open.remove(0);
+			openHashMap.remove(curr.coordinate);
+			closedHashMap.put(curr.coordinate, curr);
 			if (curr.coordinate.equals(dest)){
 				// found dest
+				return curr.tracePath();
 			}
+			
 			for(AStarNode succ: curr.getSuccessors()){
-				
-			}
-			
-			int lowestScore = -1;
-			Coordinate q = null;
-			for(Coordinate c: open.keySet()){
-				if (lowestScore == -1){
-					//first node 
-					lowestScore = open.get(c);
-					q = c;
+				if (closedHashMap.containsKey(succ.coordinate)){
+					continue;
 				}
-				else if (open.get(c)<lowestScore){
-					lowestScore = open.get(c);
-					q = c;
+				if(!openHashMap.containsKey(succ.coordinate)){
+					open.add(succ);
+					openHashMap.put(succ.coordinate, succ);
+				}					
+				if (succ.getCostFromStart() > openHashMap.get(succ.coordinate).getCostFromStart()){
+					continue;
 				}
+				open.remove(openHashMap.get(succ.coordinate));
+				openHashMap.remove(curr.coordinate);
+				open.add(succ);
+				openHashMap.put(succ.coordinate,succ);
 			}
-			open.remove(q);
-			
 		}
+		return null;
 	}
 	
 	

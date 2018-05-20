@@ -5,8 +5,8 @@ import tiles.TrapTile;
 import utilities.Coordinate;
 
 public class Node {
-    final private Coordinate coordinate;
-    final private MapTile tile;
+    final protected Coordinate coordinate;
+    final protected MapTile tile;
     
     public Node(Coordinate coordinate, MapTile mapTile) {
         this.coordinate = coordinate;

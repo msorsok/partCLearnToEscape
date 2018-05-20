@@ -11,8 +11,6 @@ public class Node {
     public Node(Coordinate coordinate, MapTile mapTile) {
         this.coordinate = coordinate;
         this.tile = mapTile;
-        this.id = coordinate.toString();
-        edgesIn = 0;
     }
    
     public Coordinate getCoordinate() {

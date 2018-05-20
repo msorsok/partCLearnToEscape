@@ -51,7 +51,7 @@ public class AStarNode extends Node{
 
 	public double heuristic(Coordinate coordinate, Coordinate dest){
 		// straight line distance
-		return Math.pow(Math.pow((coordinate.x - dest.x),2) + Math.pow((coordinate.x - dest.x),2), 0.5);
+		return Math.pow(Math.pow((coordinate.x - dest.x),2) + Math.pow((coordinate.y - dest.y),2), 0.5);
 	}
 	
 	public ArrayList<AStarNode> getSuccessors(){
@@ -79,7 +79,6 @@ public class AStarNode extends Node{
 			if(newMapTile != null){
 				switch(newMapTile.getType()){
 				case WALL:
-					System.out.println("didnt make wall successor");
 					break;
 				case TRAP:
 					switch(((TrapTile) this.map.get(newCoordinate)).getTrap()){
@@ -108,6 +107,8 @@ public class AStarNode extends Node{
 			path.add(0, curr.coordinate);
 			curr = curr.pathParent;
 		}
+		//System.out.print("A star node removed: ");
+		//System.out.println(path.remove(0));
 		return path;
 	}
 }

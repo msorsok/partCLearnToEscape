@@ -9,16 +9,12 @@ public class PhysicsCalculations {
 	 * From a given source to a given destination, calculates whether to turn right or left 
 	 * @return  left if angle is between (0,180), right (180,360) and null otherwise
 	 */
-	public static WorldSpatial.RelativeDirection getTurningDirection(Coordinate src, Coordinate dest, float travellingAngle){
-		float srcX = src.x;
-		float srcY = src.y;
-		float destX = dest.x;
-		float destY = dest.y;
-		
+	public static WorldSpatial.RelativeDirection getTurningDirection(float srcX, float srcY, float destX, float destY, float travellingAngle){
 		float destAngle = getAngleToDest(destX, destY, srcX, srcY);
 		float currentAngle = travellingAngle;
 		float angleBetween = (destAngle - currentAngle + 360) % 360;
-		if(angleBetween > 180 && angleBetween < 360) {
+		System.out.println(angleBetween);
+		if(angleBetween >= 180 && angleBetween < 360) {
 			return WorldSpatial.RelativeDirection.RIGHT;
 		}
 		else if(angleBetween > 0 && angleBetween < 180) {

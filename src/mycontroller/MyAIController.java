@@ -8,6 +8,7 @@ import java.util.Set;
 import controller.CarController;
 import tiles.LavaTrap;
 import tiles.MapTile;
+import tiles.TrapTile;
 import utilities.Coordinate;
 import world.Car;
 import world.World;
@@ -77,8 +78,69 @@ public class MyAIController extends CarController{
 			}
 		}
 	}
+	/** 
+	 * Searches the map to determine which is the most useful coordinate to visit next
+	 * @param src the coordinate we're travelling from
+	 * @return The coordinate we want to travel to
+	 */
+	private Coordinate getDestination(Coordinate src) {
+		Coordinate bestDest = src;
+		float highestUtility = -1;
+		
+		for(Coordinate c: map.keySet()) {
+			int unseen = getUnseen(c);
+			float distance = getEuclideanDistance(src, c);
+			MapTile thisTile = map.get(c);
+			float thisUtility = calculateUtility(unseen, distance, thisTile);
+			if(thisUtility > highestUtility) {
+				bestDest = c;
+				highestUtility = thisUtility;
+			}
+		}
+		return bestDest;
+	}
+	
+	private float calculateUtility(int unseen, float distance, MapTile tile) {
+		float totalUtility = 0;
+		int unseenWeight = 10;
+		int distanceWeight = 2;
+		
+		totalUtility += unseenWeight * unseen;
+		totalUtility += distanceWeight * distance;
+		if(tile.getType().equals(MapTile.Type.ROAD)) {
+			totalUtility += 10;
+		}
+		else if(tile.getType().equals(MapTile.Type.TRAP)) {
+			if( ((TrapTile) tile).getTrap().equals("health")){
+				totalUtility += 11;
+			}
+		}
+		
+		return totalUtility;
+	}
+	
+	private float getEuclideanDistance(Coordinate src, Coordinate dest) {
+		return (float) Math.sqrt(Math.pow(Math.abs(src.x - dest.x), 2) + Math.pow(Math.abs(src.y - dest.y), 2));
+	}
+	
+	private int getUnseen(Coordinate c) {
+		int unseen = 0;
+
+		for(int x=-4;x<5;x++) {
+			for(int y=-4;y<5;y++) {
+				Coordinate newCoordinate = new Coordinate(c.x + x, c.y + y);
+
+				if(!map.containsKey(newCoordinate)&&(World.getMap().get(newCoordinate)).getType()!=MapTile.Type.EMPTY) {
+	 				unseen ++;
+				}
+				newCoordinate = null;
+			}
+		}
+		return unseen;
+	}
 	
 	private void initialiseMap(){
+		map = new HashMap<>();
 		for (Coordinate c: World.getMap().keySet()){
 			if(World.getMap().get(c).equals(MapTile.Type.WALL)){
 				map.put(c, World.getMap().get(c));

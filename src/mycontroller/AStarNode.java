@@ -1,50 +1,49 @@
 package mycontroller;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
+import automail.MailItem;
+import automail.PriorityMailItem;
 import utilities.Coordinate;
 
 public class AStarsearch{
-	public class AStarNode implements Comparable {
+	public class AStarNode implements{
 		AStarNode pathParent;
 		double costFromStart;
 		double estimatedCostToGoal;
-	
-	
-		public float getCost() {
+		Coordinate coordinate;
+		
+		public AStarNode(Coordinate coordinate, AStarNode parent, double costFromStart, Coordinate dest){
+			this.coordinate = coordinate;
+			this.pathParent = parent;
+			this.costFromStart = costFromStart;
+			this.estimatedCostToGoal = heuristic(coordinate, dest);
+		}
+		
+		public static Comparator<AStarNode> NodeComparator = new Comparator<AStarNode>() {
+			public int compare(AStarNode n1, AStarNode n2){
+				return n1.getCost() - n2.getCost();
+		}};
+		
+		
+		public double getCost() {
 			return costFromStart + estimatedCostToGoal;
 		}
 	
 		public int compareTo(Object other) {
-			float thisValue = this.getCost();
-			float otherValue = ((AStarNode)other).getCost();
-			float v = thisValue - otherValue;
+			double thisValue = this.getCost();
+			double otherValue = ((AStarNode)other).getCost();
+			double v = thisValue - otherValue;
 			return (v>0)?1:(v<0)?-1:0; // sign function
 		}
 	
-	  /**
-	    Gets the cost between this node and the specified
-	    adjacent (AKA "neighbor" or "child") node.
-	  */
-		public float getCost(AStarNode node){
-			
+		public double getEstimatedCost(AStarNode node){
+			return this.estimatedCostToGoal;
 		}
-		
-	  /**
-	    Gets the estimated cost between this node and the
-	    specified node. The estimated cost should never exceed
-	    the true cost. The better the estimate, the more
-	    effecient the search.
-	  */
-		public abstract float getEstimatedCost(AStarNode node);
 	
-	  /**
-	    Gets the children (AKA "neighbors" or "adjacent nodes")
-	    of this node.
-	  */
-		public abstract List getNeighbors();
-		
+		public double heuristic(Coordinate )
 		
 		private ArrayList<Coordinate> findPath(Coordinate src, Coordinate dest){
 			ArrayList<Coordinate> path = new ArrayList<>();

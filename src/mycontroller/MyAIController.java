@@ -87,9 +87,10 @@ public class MyAIController extends CarController{
 	}
 	
 	private ArrayList<Coordinate> findPath(Coordinate src, Coordinate dest){
-		ArrayList<Coordinate> path = new ArrayList<>();
-		HashMap<Coordinate, Int> open = new HashMap<>();
-		HashMap<Coordinate, Int> closed = new HashMap<>();
+		ArrayList<AStarNode> path = new ArrayList<>();
+		ArrayList<AStarNode> open = new HashMap<>();
+		ArrayList<AStarNode> closed = new HashMap<>();
+		AStarNode root = new AStarNode(src, null, )
 		open.put(src, 0);
 		while(!open.isEmpty()){
 			int lowestScore = -1;

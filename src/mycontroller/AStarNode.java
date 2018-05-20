@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 import tiles.MapTile;
+import tiles.TrapTile;
 import utilities.Coordinate;
 import world.WorldSpatial;
 
@@ -13,13 +14,15 @@ public class AStarNode extends Node{
 	double costFromStart;
 	double estimatedCostToGoal;
 	HashMap<Coordinate, MapTile> map;
+	Coordinate dest;
 	
-	public AStMapTileHashMap<Coordinate, Maptile> map, Coordinate coordinate, AStarNode parent, double costFromStart, Coordinate dest){
+	public AStarNode(HashMap<Coordinate, MapTile> map, Coordinate coordinate, AStarNode parent, double costFromStart, Coordinate dest){
 		super(coordinate, map.get(coordinate));
 		this.map = map;
 		this.pathParent = parent;
 		this.costFromStart = costFromStart;
 		this.estimatedCostToGoal = heuristic(coordinate, dest);
+		this.dest = dest;
 	}
 	
 	public static Comparator<AStarNode> NodeComparator = new Comparator<AStarNode>() {
@@ -50,14 +53,40 @@ public class AStarNode extends Node{
 	public ArrayList<AStarNode> getSuccessors(){
 		ArrayList<AStarNode> successors = new ArrayList<>();
 		for (WorldSpatial.Direction d: WorldSpatial.Direction.values()){
-			switch(d){
+			switch(d) {
+				Coordinate newCoordinate;
 				case EAST:
-					Coordinate newCoordinate = new Coordinate(this.coordinate.x + 1, this.coordinate.y);
-					switch(this.map.get(newCoordinate).getType()){
-						case MapTile.Type:
+					newCoordinate = new Coordinate(this.coordinate.x + 1, this.coordinate.y);
+					break;
+				case WEST:
+					newCoordinate = new Coordinate(this.coordinate.x - 1, this.coordinate.y);
+					break;
+				case NORTH:
+					newCoordinate = new Coordinate(this.coordinate.x, this.coordinate.y + 1);
+					break;
+				case SOUTH:
+					newCoordinate = new Coordinate(this.coordinate.x, this.coordinate.y - 1);
+					break;
+				
+							
 							
 					}
-					if (map.gnewCoordinate.)
+			switch(this.map.get(newCoordinate).getType()){
+			case WALL:
+				break;
+			case TRAP:
+				switch(((TrapTile) this.map.get(newCoordinate)).getTrap()){
+					case "lava":
+						successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 2, this.dest));
+						break;
+					case "health":
+						successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 0.7, this.dest));
+						break;
+					case "grass":
+						successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 1.1, this.dest));
+						break;
+				}
+			
 					successors.add(new AStarNode(this.map, this, this.costFromStart + 1, ));
 			}
 				

@@ -10,6 +10,7 @@ import tiles.LavaTrap;
 import tiles.MapTile;
 import utilities.Coordinate;
 import world.Car;
+import world.World;
 import world.WorldSpatial;
 
 
@@ -19,7 +20,7 @@ public class MyAIController extends CarController{
 	// How many minimum units the wall is away from the player.
 	private int wallSensitivity = 2;
 	private int currKey = 4;
-	
+	public HashMap<Coordinate, MapTile> map; 
 	private boolean isFollowingWall = false; // This is initialized when the car sticks to a wall.
 	private WorldSpatial.RelativeDirection lastTurnDirection = null; // Shows the last turn direction the car takes.
 	private boolean isTurningLeft = false;
@@ -33,6 +34,7 @@ public class MyAIController extends CarController{
 	private int EAST_THRESHOLD = 3;
 	public MyAIController(Car car) {
 		super(car);
+		initialiseMap();
 	}
 	Coordinate initialGuess;
 	boolean notSouth = true;
@@ -40,7 +42,7 @@ public class MyAIController extends CarController{
 	@Override
 	public void update(float delta) {
 		HashMap<Coordinate, MapTile> currentView = getView();
-		// TODO Auto-generated method stub
+		updateMap(currentView);
 		Coordinate dest = getDest();
 		if(getSpeed() < CAR_SPEED){
 			applyForwardAcceleration();
@@ -67,6 +69,22 @@ public class MyAIController extends CarController{
 			}
 			else{
 				turnRight(delta);
+			}
+		}
+	}
+	
+	private void initialiseMap(){
+		for (Coordinate c: World.getMap().keySet()){
+			if(World.getMap().get(c).equals(MapTile.Type.WALL)){
+				map.put(c, World.getMap().get(c));
+			}
+		}
+	}
+	
+	private void updateMap(HashMap<Coordinate, MapTile> view){
+		for (Coordinate c: view.keySet()){
+			if (!(map.containsKey(c)) && !(view.get(c).getType().equals(MapTile.Type.EMPTY))){
+				map.put(c, view.get(c));
 			}
 		}
 	}

@@ -7,11 +7,10 @@ import utilities.Coordinate;
 public class Node {
     final private Coordinate coordinate;
     final private MapTile tile;
-
-
-    public Node(Coordinate coordinate, MapTile tile) {
+    
+    public Node(Coordinate coordinate, MapTile mapTile) {
         this.coordinate = coordinate;
-        this.tile = tile;
+        this.tile = mapTile;
         this.id = coordinate.toString();
         edgesIn = 0;
     }

@@ -7,31 +7,7 @@ package world;
  */
 public class WorldSpatial {
 	
-	public enum Direction { 
-		EAST{
-	        @Override
-	        public Direction leftFrom() {
-	            return values()[3]; 
-	        };
-		},
-		SOUTH, 
-		WEST, 
-		NORTH {
-	        @Override
-	        public Direction rightFrom() {
-	            return values()[0]; // see below for options for this line
-	        };
-	    };
-		
-		public Direction rightFrom(){
-			return values()[ordinal() + 1];
-		}
-		
-		public Direction leftFrom(){
-			return values()[ordinal() - 1];
-		}
-	}
-		
+	public enum Direction { EAST, WEST, SOUTH, NORTH}
 	
 	public static enum RelativeDirection { LEFT, RIGHT };
 	
@@ -40,6 +16,4 @@ public class WorldSpatial {
 	public final static int NORTH_DEGREE = 90;
 	public final static int WEST_DEGREE = 180;
 	public final static int SOUTH_DEGREE = 270;
-	
-	
 }

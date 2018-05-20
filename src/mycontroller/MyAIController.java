@@ -88,11 +88,21 @@ public class MyAIController extends CarController{
 	
 	private ArrayList<Coordinate> findPath(Coordinate src, Coordinate dest){
 		ArrayList<AStarNode> path = new ArrayList<>();
-		ArrayList<AStarNode> open = new HashMap<>();
-		ArrayList<AStarNode> closed = new HashMap<>();
-		AStarNode root = new AStarNode(src, null, )
-		open.put(src, 0);
+		ArrayList<AStarNode> open = new ArrayList<>();
+		ArrayList<AStarNode> closed = new ArrayList<>();
+		AStarNode root = new AStarNode(src, null, 0, dest);
+		AStarNode curr;
+		open.add(root);
 		while(!open.isEmpty()){
+			open.sort(AStarNode.NodeComparator);
+			curr = open.remove(0);
+			if (curr.coordinate.equals(dest)){
+				// found dest
+			}
+			for(AStarNode succ: curr.getSuccessors()){
+				
+			}
+			
 			int lowestScore = -1;
 			Coordinate q = null;
 			for(Coordinate c: open.keySet()){

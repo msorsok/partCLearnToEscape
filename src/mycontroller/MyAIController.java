@@ -45,6 +45,7 @@ public class MyAIController extends CarController{
 		HashMap<Coordinate, MapTile> currentView = getView();
 		updateMap(currentView);
 		Coordinate dest = new Coordinate(4,4);
+		System.out.println(map.get(dest).getType());
 		if(getSpeed() < CAR_SPEED){
 			applyForwardAcceleration();
 		}
@@ -184,6 +185,10 @@ public class MyAIController extends CarController{
 		
 		while(!open.isEmpty()){
 			open.sort(AStarNode.NodeComparator);
+			for (AStarNode n: open){
+				System.out.print(n.getCost() + ",");
+			}
+			System.out.println("");
 			curr = open.remove(0);
 			openHashMap.remove(curr.coordinate);
 			closedHashMap.put(curr.coordinate, curr);

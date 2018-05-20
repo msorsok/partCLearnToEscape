@@ -27,7 +27,7 @@ public class AStarNode extends Node{
 	
 	public static Comparator<AStarNode> NodeComparator = new Comparator<AStarNode>() {
 		public int compare(AStarNode n1, AStarNode n2){
-			return (int)Math.round(n2.getCost() - n1.getCost());
+			return (int)Math.round(n1.getCost() - n2.getCost());
 	}};
 	
 	public double getCostFromStart(){
@@ -76,25 +76,27 @@ public class AStarNode extends Node{
 					}
 			
 			MapTile newMapTile = this.map.get(newCoordinate);
-			
-			switch(newMapTile.getType()){
-			case WALL:
-				break;
-			case TRAP:
-				switch(((TrapTile) this.map.get(newCoordinate)).getTrap()){
-					case "lava":
-						successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 2, this.dest));
-						break;
-					case "health":
-						successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 0.7, this.dest));
-						break;
-					case "grass":
-						successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 1.1, this.dest));
-						break;
+			if(newMapTile != null){
+				switch(newMapTile.getType()){
+				case WALL:
+					System.out.println("didnt make wall successor");
+					break;
+				case TRAP:
+					switch(((TrapTile) this.map.get(newCoordinate)).getTrap()){
+						case "lava":
+							successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 2, this.dest));
+							break;
+						case "health":
+							successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 0.7, this.dest));
+							break;
+						case "grass":
+							successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 1.1, this.dest));
+							break;
+					}
+				default:
+					successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 1, this.dest));
 				}
-			default:
-				successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 1, this.dest));
-			}		
+			}
 		}
 		return successors;	
 	}

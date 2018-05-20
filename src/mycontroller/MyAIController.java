@@ -2,9 +2,6 @@ package mycontroller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import controller.CarController;
 import tiles.LavaTrap;
 import tiles.MapTile;
@@ -15,24 +12,13 @@ import world.World;
 import world.WorldSpatial;
 
 
-
 public class MyAIController extends CarController{
 	
-	// How many minimum units the wall is away from the player.
-	private int wallSensitivity = 2;
-	private int currKey = 4;
 	public HashMap<Coordinate, MapTile> map; 
-	private boolean isFollowingWall = false; // This is initialized when the car sticks to a wall.
-	private WorldSpatial.RelativeDirection lastTurnDirection = null; // Shows the last turn direction the car takes.
-	private boolean isTurningLeft = false;
-	private boolean isTurningRight = false; 
-	private WorldSpatial.Direction previousState = null; // Keeps track of the previous state
-	
+
 	// Car Speed to move at
-	private final float CAR_SPEED = 3f;
+	private float carSpeed = 8f;
 	
-	// Offset used to differentiate between 0 and 360 degrees
-	private int EAST_THRESHOLD = 3;
 	public MyAIController(Car car) {
 		super(car);
 		initialiseMap();
@@ -42,10 +28,10 @@ public class MyAIController extends CarController{
 
 	@Override
 	public void update(float delta) {
-		System.out.println(delta);
 		HashMap<Coordinate, MapTile> currentView = getView();
 		updateMap(currentView);
 		Coordinate src = new Coordinate(getPosition());
+		
 		Coordinate dest;
 		if (getDestKey() != null){
 			dest = getDestKey();
@@ -54,17 +40,24 @@ public class MyAIController extends CarController{
 			dest = getDestination(getReachable(src), src);
 		}
 		
-		if(getSpeed() < CAR_SPEED){
-			applyForwardAcceleration();
+		boolean reversing = getSpeed() < 0 ? true : false;
+		ArrayList<Coordinate> path = findPath(src, dest);
+		if (path.get(0).equals(src)){
+			path.remove(0);
 		}
-		
-		ArrayList<Coordinate> path = findPath(src, dest);		
 		ArrayList<Float> destCoordinates  = adjustAwayFromWall(path.get(0));
-		System.out.println(path.get(0));
-		System.out.println(destCoordinates);
-		System.out.println(getX());
-		System.out.println(getY());
-		WorldSpatial.RelativeDirection direction = PhysicsCalculations.getTurningDirection(getX(), getY(),  destCoordinates.get(0), destCoordinates.get(1), getAngle());
+		
+		if (PhysicsCalculations.acceleratingForward(getX(), getY(),  destCoordinates.get(0), destCoordinates.get(1), getAngle())){
+			if(getSpeed() < carSpeed){
+				applyForwardAcceleration();
+			}
+		}
+		else{
+			if(getSpeed() > -carSpeed){
+				applyReverseAcceleration();
+			}
+		}
+		WorldSpatial.RelativeDirection direction = PhysicsCalculations.getTurningDirection(getX(), getY(),  destCoordinates.get(0), destCoordinates.get(1), getAngle(), reversing);
 		if (direction == null){
 		}
 		else if((direction).equals(WorldSpatial.RelativeDirection.LEFT)){
@@ -72,6 +65,37 @@ public class MyAIController extends CarController{
 		}
 		else if ((direction).equals(WorldSpatial.RelativeDirection.RIGHT)){
 			turnRight(delta);
+		}
+	}
+	
+	private void applyBrakes(Coordinate src){
+		ArrayList<Coordinate> check = new ArrayList<>();
+		if (0 <= getAngle() && getAngle() < 90){
+			check.add(new Coordinate(src.x+1, src.y));
+			check.add(new Coordinate(src.x+1, src.y+1));
+			check.add(new Coordinate(src.x, src.y+1));
+		}
+		else if (90 <= getAngle() && getAngle() < 180){
+			check.add(new Coordinate(src.x, src.y+1));
+			check.add(new Coordinate(src.x-1, src.y+1));
+			check.add(new Coordinate(src.x-1, src.y));
+		}
+		else if (180 <= getAngle() && getAngle() < 270){
+			check.add(new Coordinate(src.x-1, src.y));
+			check.add(new Coordinate(src.x-1, src.y-1));
+			check.add(new Coordinate(src.x, src.y-1));
+		}
+		else {
+			check.add(new Coordinate(src.x, src.y-1));
+			check.add(new Coordinate(src.x+1, src.y-1));
+			check.add(new Coordinate(src.x, src.y+1));
+		}
+		
+		for(Coordinate c: check){
+			if (map.get(c).getType()==MapTile.Type.WALL){
+				carSpeed = 1f;
+				//applyReverseAcceleration();
+			}
 		}
 	}
 	
@@ -109,6 +133,11 @@ public class MyAIController extends CarController{
 					}
 				}			
 			}
+		}
+		reachable.remove(0);
+		if (reachable.contains(null)){
+			System.out.println("how?????");
+			System.exit(0);
 		}
 		return reachable;
 	}
@@ -160,16 +189,21 @@ public class MyAIController extends CarController{
 	 * @return The coordinate we want to travel to
 	 */
 	private Coordinate getDestination(ArrayList<Coordinate> reachable, Coordinate src) {
-		Coordinate bestDest = src;
-		float highestUtility = -1;
+		Coordinate bestDest = null;
+		float highestUtility = -Float.MAX_VALUE;
+		
 		for(Coordinate c: reachable) {
 				int unseen = getUnseen(c);
+				if (unseen == 0){
+					continue;
+				}
 				float distance = getEuclideanDistance(src, c);
 				MapTile thisTile = map.get(c);
 				float thisUtility = calculateUtility(unseen, distance, thisTile);
-				if(thisUtility > highestUtility) {
+				if(thisUtility > highestUtility){
 					bestDest = c;
 					highestUtility = thisUtility;
+					System.out.println(bestDest);
 				}
 		}
 		return bestDest;
@@ -177,8 +211,8 @@ public class MyAIController extends CarController{
 	
 	private float calculateUtility(int unseen, float distance, MapTile tile) {
 		float totalUtility = 0;
-		int unseenWeight = 10;
-		int distanceWeight = 2;
+		int unseenWeight = 1;
+		int distanceWeight = -2;
 		
 		totalUtility += unseenWeight * unseen;
 		totalUtility += distanceWeight * distance;
@@ -206,7 +240,6 @@ public class MyAIController extends CarController{
 				if(!map.containsKey(newCoordinate)&&(World.getMap().containsKey(newCoordinate))&&(World.getMap().get(newCoordinate)).getType()!=MapTile.Type.EMPTY) {
 	 				unseen ++;
 				}
-				newCoordinate = null;
 			}
 		}
 		return unseen;
@@ -233,14 +266,15 @@ public class MyAIController extends CarController{
 		HashMap<Coordinate, MapTile> currentView = getView();
 		Coordinate dest = null;
 		for (Coordinate c: currentView.keySet()){
-			MapTile t = currentView.get(c);
-			if (t instanceof LavaTrap){
-				if (((LavaTrap) t).getKey() == currKey){
-					return c;
+			if(!c.equals(new Coordinate(getPosition()))){
+				MapTile t = currentView.get(c);
+				if (t instanceof LavaTrap){
+					if (((LavaTrap) t).getKey() == (getKey() - 1)){
+						return c;
+					}
 				}
 			}
 		}
-		System.out.println(dest);
 		return dest;
 	}
 	
@@ -256,6 +290,8 @@ public class MyAIController extends CarController{
 		openHashMap.put(src, root);
 		
 		while(!open.isEmpty()){
+			//System.out.println(open);
+			//System.out.println(closedHashMap);
 			open.sort(AStarNode.NodeComparator);
 			curr = open.remove(0);
 			openHashMap.remove(curr.coordinate);

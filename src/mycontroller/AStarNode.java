@@ -106,8 +106,7 @@ public class AStarNode extends Node{
 		while(curr != null){
 			path.add(0, curr.coordinate);
 			curr = curr.pathParent;
-		}
-		path.remove(0);
+		}		
 		return path;
 	}
 }

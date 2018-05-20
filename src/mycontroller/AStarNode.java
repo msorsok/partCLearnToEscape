@@ -1,17 +1,22 @@
 package mycontroller;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 
+import tiles.MapTile;
 import utilities.Coordinate;
+import world.WorldSpatial;
 
-public class AStarNode{
+public class AStarNode extends Node{
 	AStarNode pathParent;
 	double costFromStart;
 	double estimatedCostToGoal;
-	Coordinate coordinate;
+	HashMap<Coordinate, MapTile> map;
 	
-	public AStarNode(Coordinate coordinate, AStarNode parent, double costFromStart, Coordinate dest){
-		this.coordinate = coordinate;
+	public AStMapTileHashMap<Coordinate, Maptile> map, Coordinate coordinate, AStarNode parent, double costFromStart, Coordinate dest){
+		super(coordinate, map.get(coordinate));
+		this.map = map;
 		this.pathParent = parent;
 		this.costFromStart = costFromStart;
 		this.estimatedCostToGoal = heuristic(coordinate, dest);
@@ -44,6 +49,20 @@ public class AStarNode{
 	
 	public ArrayList<AStarNode> getSuccessors(){
 		ArrayList<AStarNode> successors = new ArrayList<>();
+		for (WorldSpatial.Direction d: WorldSpatial.Direction.values()){
+			switch(d){
+				case EAST:
+					Coordinate newCoordinate = new Coordinate(this.coordinate.x + 1, this.coordinate.y);
+					switch(this.map.get(newCoordinate).getType()){
+						case MapTile.Type:
+							
+					}
+					if (map.gnewCoordinate.)
+					successors.add(new AStarNode(this.map, this, this.costFromStart + 1, ));
+			}
+				
+		}
+		AStarNode succ;
 		
 	}
 }

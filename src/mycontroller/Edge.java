@@ -1,22 +1,22 @@
 package mycontroller;
 
 public class Edge  {
-    private final Vertex source;
-    private final Vertex destination;
+    private final Node source;
+    private final Node destination;
     private final int weight;
 
-    public Edge(Vertex source, Vertex destination, int weight) {
+    public Edge(Node source, Node destination, int weight) {
         this.source = source;
         this.destination = destination;
         this.weight = weight;
     }
 
 
-    public Vertex getDestination() {
+    public Node getDestination() {
         return destination;
     }
 
-    public Vertex getSource() {
+    public Node getSource() {
         return source;
     }
     public int getWeight() {

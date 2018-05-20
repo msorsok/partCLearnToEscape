@@ -3,15 +3,15 @@ package mycontroller;
 import java.util.List;
 
 public class Graph {
-	private final List<Vertex> vertexes;
+	private final List<Node> vertexes;
 	private final List<Edge> edges;
 
-	public Graph(List<Vertex> vertexes, List<Edge> edges) {
+	public Graph(List<Node> vertexes, List<Edge> edges) {
 	    this.vertexes = vertexes;
 	    this.edges = edges;
 	}
 
-	public List<Vertex> getVertexes() {
+	public List<Node> getVertexes() {
 	    return vertexes;
 	}
 

@@ -14,7 +14,7 @@ public class DestinationFinder {
 	public ArrayList<Coordinate> path = new ArrayList<>();
 	public ArrayList<WorldSpatial.RelativeDirection> turnList = new ArrayList<>();
 	public Coordinate startedLine;
-	private ArrayList<Vertex> nodes = new ArrayList<Vertex>();
+	private ArrayList<Node> nodes = new ArrayList<Node>();
     private ArrayList<Edge> edges = new ArrayList<Edge>();
     private HashMap<Coordinate, MapTile> givenMap;
 	
@@ -28,15 +28,15 @@ public class DestinationFinder {
 		// Iterate through all of the visible vertexes
 	    while (keyIterator.hasNext()) {
 	    	  Coordinate coordinateToAdd = keyIterator.next();
-	    	  Vertex vertexToAdd = new Vertex(coordinateToAdd, currentView.get(coordinateToAdd));
+	    	  Node vertexToAdd = new Node(coordinateToAdd, currentView.get(coordinateToAdd));
 	    	  if(!nodes.contains(vertexToAdd) && !currentView.get(coordinateToAdd).getType().equals(MapTile.Type.EMPTY) && !currentView.get(coordinateToAdd).getType().equals(MapTile.Type.WALL)) {
 	    		  nodes.add(vertexToAdd);
 	    	  }
 	    }
 	    	// Go through all the other nodes and try and build an edge
 	    
-	    for(Vertex v1 : nodes) {
-	    	  for(Vertex v2 : nodes) {
+	    for(Node v1 : nodes) {
+	    	  for(Node v2 : nodes) {
 	    		  if(v2 != v1 && Math.abs(v1.getCoordinate().x - v2.getCoordinate().x) + Math.abs(v1.getCoordinate().y - v2.getCoordinate().y) == 1) {
 	    			  Edge edgeToAdd = new Edge(v2, v1, v1.getPenalty());
 	    			  if(!edges.contains(edgeToAdd)) {
@@ -54,18 +54,18 @@ public class DestinationFinder {
 		path.clear();
 		Graph map = new Graph(nodes, edges);
 		DijkstraAlgorithm dA = new DijkstraAlgorithm(map);
-		dA.execute(new Vertex(src, new MapTile(type)));
-		Vertex dest = getBestDestination(dA, src);
+		dA.execute(new Node(src, new MapTile(type)));
+		Node dest = getBestDestination(dA, src);
 		System.out.println(dest.getCoordinate());
-		LinkedList<Vertex> longPath = dA.getPath(dest);
-		for(Vertex v : longPath) {
+		LinkedList<Node> longPath = dA.getPath(dest);
+		for(Node v : longPath) {
 			System.out.println(v.getCoordinate());
 		}
 		Coordinate lastSaved = null;
 		Coordinate last = null;
 		
 		//Simplify path
-		for(Vertex v : longPath) {
+		for(Node v : longPath) {
 			if(lastSaved == null) {
 				startedLine = v.getCoordinate();
 				lastSaved = v.getCoordinate();
@@ -83,12 +83,12 @@ public class DestinationFinder {
 		}
 	}
 	
-	private Vertex getBestDestination(DijkstraAlgorithm dA, Coordinate src) {
-		Vertex bestVertexSoFar = null;
+	private Node getBestDestination(DijkstraAlgorithm dA, Coordinate src) {
+		Node bestVertexSoFar = null;
 		int lowestEdgesIn = 5; //most edges into any square is 4
 		float length = Float.MAX_VALUE;
 		
-		for(Vertex v : nodes) {
+		for(Node v : nodes) {
 			
 			if(v.getEdgesIn() <= lowestEdgesIn && dA.getPath(v) != null) {
 				int wallAdjusted = v.getEdgesIn() + checkSurrounding(v.getCoordinate());

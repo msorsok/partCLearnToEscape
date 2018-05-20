@@ -43,15 +43,20 @@ public class MyAIController extends CarController{
 	public void update(float delta) {
 		HashMap<Coordinate, MapTile> currentView = getView();
 		updateMap(currentView);
-		Coordinate dest = new Coordinate(4,4);
-		System.out.println(map.get(dest).getType());
+		Coordinate src = new Coordinate((int)getX(), (int)getY());
+		Coordinate dest = getDestination(src);
 		if(getSpeed() < CAR_SPEED){
 			applyForwardAcceleration();
 		}
 		
-		System.out.println(findPath(new Coordinate((int)getX(), (int)getY()), dest));
-		
-		
+		ArrayList<Coordinate> path = findPath(src, dest);
+		Coordinate firstDest  = path.get(0);
+		if((PhysicsCalculations.getTurningDirection(src, dest, getAngle()).equals(WorldSpatial.RelativeDirection.LEFT))){
+			turnLeft(delta);
+		}
+		else if ((PhysicsCalculations.getTurningDirection(src, dest, getAngle()).equals(WorldSpatial.RelativeDirection.RIGHT))){
+			turnRight(delta);
+		}
 		
 		if (dest != null){
 			double destAngle = Math.toDegrees(Math.atan((dest.y - getY())/(dest.x - getX())));
@@ -124,10 +129,6 @@ public class MyAIController extends CarController{
 		
 		while(!open.isEmpty()){
 			open.sort(AStarNode.NodeComparator);
-			for (AStarNode n: open){
-				System.out.print(n.getCost() + ",");
-			}
-			System.out.println("");
 			curr = open.remove(0);
 			openHashMap.remove(curr.coordinate);
 			closedHashMap.put(curr.coordinate, curr);

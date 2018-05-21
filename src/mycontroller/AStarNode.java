@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 
+import tiles.LavaTrap;
 import tiles.MapTile;
 import tiles.TrapTile;
 import utilities.Coordinate;
@@ -15,14 +16,16 @@ public class AStarNode extends Node{
 	private double estimatedCostToGoal;
 	private HashMap<Coordinate, MapTile> map;
 	private Coordinate dest;
+	private double health;
 	
-	public AStarNode(HashMap<Coordinate, MapTile> map, Coordinate coordinate, AStarNode parent, double costFromStart, Coordinate dest){
+	public AStarNode(HashMap<Coordinate, MapTile> map, Coordinate coordinate, AStarNode parent, double costFromStart, Coordinate dest, double health){
 		super(coordinate, map.get(coordinate));
 		this.map = map;
 		this.pathParent = parent;
 		this.costFromStart = costFromStart;
 		this.estimatedCostToGoal = heuristic(coordinate, dest);
 		this.dest = dest;
+		this.health = health;
 	}
 	
 	public static Comparator<AStarNode> NodeComparator = new Comparator<AStarNode>() {
@@ -50,8 +53,8 @@ public class AStarNode extends Node{
 	}
 
 	public double heuristic(Coordinate coordinate, Coordinate dest){
-		// straight line distance
-		return Math.pow(Math.pow((coordinate.x - dest.x),2) + Math.pow((coordinate.y - dest.y),2), 0.5);
+		// straight line distance scaled up by 5
+		return 5 * Math.pow(Math.pow((coordinate.x - dest.x),2) + Math.pow((coordinate.y - dest.y),2), 0.5);
 	}
 	
 	public ArrayList<AStarNode> getSuccessors(){
@@ -78,24 +81,29 @@ public class AStarNode extends Node{
 			MapTile newMapTile = this.map.get(newCoordinate);
 			if(newMapTile != null){
 				switch(newMapTile.getType()){
-				case WALL:
-					break;
-				case TRAP:
-					switch(((TrapTile) this.map.get(newCoordinate)).getTrap()){
-						case "lava":
-							successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 2, this.dest));
-							break;
-						case "health":
-							successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 0.7, this.dest));
-							break;
-						case "grass":
-							successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 1.1, this.dest));
-							break;
-					}
-				default:
-					successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 1, this.dest));
+					case WALL:
+						break;
+					case TRAP:
+						switch(((TrapTile) this.map.get(newCoordinate)).getTrap()){
+							case "lava":
+								System.out.println("we caught a lava");
+								successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 100, this.dest, this.health));
+								break;
+							case "health":
+								successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart - 5*this.health, this.dest, this.health));
+								break;
+							case "grass":
+								successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 4, this.dest, this.health));
+								break;
+							}
+						break;
+					default:
+						successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 5, this.dest, this.health));
 				}
 			}
+		}
+		for (AStarNode a: successors){
+			System.out.println(a.costFromStart);
 		}
 		return successors;	
 	}
@@ -104,6 +112,10 @@ public class AStarNode extends Node{
 		AStarNode curr = this;
 		ArrayList<Coordinate> path = new ArrayList<>();
 		while(curr != null){
+			if (map.get(curr.coordinate) instanceof LavaTrap){
+				System.out.println("how is the lava part of the path");
+				System.out.println(curr.costFromStart);
+			}
 			path.add(0, curr.coordinate);
 			curr = curr.pathParent;
 		}		

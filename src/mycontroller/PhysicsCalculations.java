@@ -1,8 +1,5 @@
 package mycontroller;
 
-import utilities.Coordinate;
-import world.WorldSpatial;
-
 public class PhysicsCalculations {
 	
 	/** 
@@ -13,28 +10,27 @@ public class PhysicsCalculations {
 		float destAngle = getAngleToDest(destX, destY, srcX, srcY);
 		float currentAngle = travellingAngle;
 		float angleBetween = (destAngle - currentAngle + 360) % 360;
-		if (angleBetween > 90 && angleBetween <270){
+		if (angleBetween > 120 && angleBetween <240){
 			return false;
 		}
 		return true;
 	}
 	
-	public static WorldSpatial.RelativeDirection getTurningDirection(float srcX, float srcY, float destX, float destY, float travellingAngle, boolean reversing){
+	public static Boolean getTurningRight(float srcX, float srcY, float destX, float destY, float travellingAngle, boolean reversing){
 		float destAngle = getAngleToDest(destX, destY, srcX, srcY);
 		float currentAngle = travellingAngle;
 		float angleBetween = (destAngle - currentAngle + 360) % 360;
-		System.out.println(angleBetween);
 		if(angleBetween >= 180 && angleBetween < 360 && !reversing) {
-			return WorldSpatial.RelativeDirection.RIGHT;
+			return true;
 		}
 		else if(angleBetween > 0 && angleBetween < 180 && !reversing) {
-			return WorldSpatial.RelativeDirection.LEFT;
+			return false;
 		}
 		else if(angleBetween >= 180 && angleBetween < 360 && reversing) {
-			return WorldSpatial.RelativeDirection.LEFT;
+			return false;
 		}
 		else if(angleBetween > 0 && angleBetween < 180 && reversing) {
-			return WorldSpatial.RelativeDirection.RIGHT;
+			return true;
 		}
 		return null;
 	}

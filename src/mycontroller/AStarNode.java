@@ -86,11 +86,10 @@ public class AStarNode extends Node{
 					case TRAP:
 						switch(((TrapTile) this.map.get(newCoordinate)).getTrap()){
 							case "lava":
-								System.out.println("we caught a lava");
-								successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 100, this.dest, this.health));
+								successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 10000 + Math.pow(5 - this.health, 2), this.dest, this.health));
 								break;
 							case "health":
-								successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart - 5*this.health, this.dest, this.health));
+								successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + this.health, this.dest, this.health));
 								break;
 							case "grass":
 								successors.add(new AStarNode(this.map, newCoordinate, this, this.costFromStart + 4, this.dest, this.health));
@@ -102,9 +101,6 @@ public class AStarNode extends Node{
 				}
 			}
 		}
-		for (AStarNode a: successors){
-			System.out.println(a.costFromStart);
-		}
 		return successors;	
 	}
 	
@@ -114,7 +110,7 @@ public class AStarNode extends Node{
 		while(curr != null){
 			if (map.get(curr.coordinate) instanceof LavaTrap){
 				System.out.println("how is the lava part of the path");
-				System.out.println(curr.costFromStart);
+				//System.out.println(curr.costFromStart);
 			}
 			path.add(0, curr.coordinate);
 			curr = curr.pathParent;

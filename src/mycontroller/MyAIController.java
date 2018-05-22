@@ -19,8 +19,8 @@ public class MyAIController extends CarController{
 	public HashMap<Coordinate, MapTile> map; 
 
 	// Car Speed to move at
-	private float CAR_SPEED = 10f;
-	private final float WALL_MARGIN = 0.2f;
+	private float CAR_SPEED = 3f;
+	private final float WALL_MARGIN = 0.3f;
 	private final float RESET_DELTAS = 10;
 	
 	private ArrayList<Double> previousSpeeds;
@@ -52,10 +52,13 @@ public class MyAIController extends CarController{
 		}		
 		else{
 			if (currTile instanceof HealthTrap && getHealth() < 95){
-				if (getSpeed()<0){
+				if (isStationary(getSpeed())){
+					
+				}
+				else if (getSpeed()<0){
 					applyForwardAcceleration();
 				}
-				else if(getSpeed() > 0){
+				else {
 					applyReverseAcceleration();
 				}
 			}
@@ -85,6 +88,7 @@ public class MyAIController extends CarController{
 					System.out.println("dest is lava");
 				}
 				ArrayList<Coordinate> path = findPath(currCoordinates, dest);
+				System.out.println(path);
 				if (path.get(0).equals(currCoordinates)){
 					path.remove(0);
 				}
@@ -93,13 +97,25 @@ public class MyAIController extends CarController{
 				Boolean isTurningRight = PhysicsCalculations.getTurningRight(getX(), getY(),  destCoordinates.get(0), destCoordinates.get(1), getAngle(), reversing);
 				System.out.print("getSpeed(): ");
 				System.out.println(getSpeed());
+				System.out.print("previousSpeed: ");
+				System.out.println(previousSpeeds.get(0));
 				if (getSpeed() == 0 && isStationary(previousSpeeds.get(0))){
 					System.out.println("starting a new reset");
 					initialiseReset();
 					reset(delta);
 				}
-				else if(map.get(path.get(0)) instanceof HealthTrap && getHealth() < 60 && Math.abs(getSpeed()) > 0.5 ){
-					
+				else if(map.get(path.get(0)) instanceof HealthTrap && getHealth() < 60 && Math.abs(getSpeed()) > 1 ){
+					System.out.println("**************close to  health");
+					if (isTurningRight != null){
+						if(isTurningRight){
+							previousTurningRight = true;
+							turnRight(delta);
+						}
+						else{
+							previousTurningRight = false;
+							turnLeft(delta);
+						}	
+					}
 				}
 				else{
 					if (isAcceleratingForward){
@@ -114,17 +130,19 @@ public class MyAIController extends CarController{
 					}
 					if (isTurningRight != null){
 						if(isTurningRight){
+							previousTurningRight = true;
 							turnRight(delta);
 						}
 						else{
+							previousTurningRight = false;
 							turnLeft(delta);
 						}	
 					}
 				}
-				previousSpeeds.add((double)getSpeed());
-				if (previousSpeeds.size()>5){
-					previousSpeeds.remove(0);
-				}
+			}
+			previousSpeeds.add((double)getSpeed());
+			if (previousSpeeds.size()>5){
+				previousSpeeds.remove(0);
 			}
 		}
 	}
@@ -169,15 +187,23 @@ public class MyAIController extends CarController{
 		System.out.println("doing a reset");
 		isResetting = true;
 		resetDeltaCount = 0;
+		double avgSpeed =  previousSpeeds.stream().mapToDouble(val -> val).average().getAsDouble();
+		if (avgSpeed == 0){
+			previousSpeeds.add(Math.random() - 0.5);
+		}
 	}
 	private void reset(float delta){
 		double avgSpeed =  previousSpeeds.stream().mapToDouble(val -> val).average().getAsDouble();
+		System.out.println(avgSpeed);
+		System.out.println(previousSpeeds);
 		if (resetDeltaCount < RESET_DELTAS){
 			resetDeltaCount++;
 			if (avgSpeed > 0){
+				System.out.println("trying to backup");
 				applyReverseAcceleration();
 			}
-			else{
+			else if (avgSpeed < 0){
+				System.out.println("trying to move forward");
 				applyForwardAcceleration();				
 			}
 			if (previousTurningRight){
@@ -227,8 +253,8 @@ public class MyAIController extends CarController{
 			}
 		}
 		reachable.remove(0);
-		System.out.print("reachable.size()-----------");
-		System.out.println(reachable.size());
+		//System.out.print("reachable.size()-----------");
+		//System.out.println(reachable.size());
 		if (reachable.contains(null)){
 			System.out.println("how?????");
 			System.exit(0);
@@ -290,9 +316,6 @@ public class MyAIController extends CarController{
 				float distance = getEuclideanDistance(src, c);
 				MapTile thisTile = map.get(c);
 				float thisUtility = calculateUtility(unseen, distance, thisTile);
-				if (thisTile instanceof HealthTrap){
-					System.out.println("TAC found");
-				}
 				if(thisUtility > highestUtility){
 					bestDest = c;
 					highestUtility = thisUtility;
@@ -304,15 +327,18 @@ public class MyAIController extends CarController{
 	private float calculateUtility(int unseen, float distance, MapTile tile) {
 		float totalUtility = 0;
 		int unseenWeight = 1;
-		int distanceWeight = -2;
+		int distanceWeight = -5;
 		
 		totalUtility += unseenWeight * unseen;
 		totalUtility += distanceWeight * distance;
-		if(tile instanceof LavaTrap) {
-			totalUtility -= 1000 ;
+		if(unseen==0){
+			totalUtility-=20;
 		}
-		else if(tile instanceof HealthTrap){
-			totalUtility += Math.pow(100 - getHealth(), 2) ;
+		if(tile instanceof LavaTrap) {
+			totalUtility -= 10000 ;
+		}
+		if(tile instanceof HealthTrap){
+			totalUtility += 100 - getHealth() ;
 			//System.out.println("health tile being considered");
 			//System.out.print("the utility of this tile is: ");
 			//System.out.println(totalUtility);
@@ -385,7 +411,7 @@ public class MyAIController extends CarController{
 		AStarNode root = new AStarNode(map, src, null, 0, dest, health);
 		AStarNode curr;
 		open.add(root);
-		openHashMap.put(src, root);
+		openHashMap.put(src, root);		
 		
 		while(!open.isEmpty()){
 			//System.out.println(open);
@@ -396,16 +422,23 @@ public class MyAIController extends CarController{
 			closedHashMap.put(curr.coordinate, curr);
 			if (curr.coordinate.equals(dest)){
 				// found dest
-				//System.out.print("--------------------");
-				//System.out.print(curr.getCost());
-				//System.out.print("--");
-				//System.out.print(curr.tracePath().size());
-				//System.out.print("--");
-				//System.out.println("--------------------");
+				System.out.print("--------------------");
+				System.out.print(curr.getCost());
+				System.out.print("--");
+				System.out.print(curr.tracePath().size());
+				System.out.print("--");
+				System.out.println("--------------------");
 				return curr.tracePath();
 			}
+			ArrayList<AStarNode> successors;
+			if (curr.coordinate.equals(src)){
+				successors = curr.getRootSuccessors(getAngle());
+			}
+			else{
+				 successors = curr.getSuccessors();
+			}
 			
-			for(AStarNode succ: curr.getSuccessors()){
+			for(AStarNode succ: successors){
 				if (closedHashMap.containsKey(succ.coordinate)){
 					continue;
 				}
@@ -414,9 +447,6 @@ public class MyAIController extends CarController{
 					openHashMap.put(succ.coordinate, succ);
 				}					
 				if (succ.getCostFromStart() > openHashMap.get(succ.coordinate).getCostFromStart()){
-					continue;
-				}
-				if (closedHashMap.containsKey(succ.coordinate) && succ.getCostFromStart() > closedHashMap.get(succ.coordinate).getCostFromStart()){
 					continue;
 				}
 				open.remove(openHashMap.get(succ.coordinate));

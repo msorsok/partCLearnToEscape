@@ -10,7 +10,7 @@ public class PhysicsCalculations {
 		float destAngle = getAngleToDest(destX, destY, srcX, srcY);
 		float currentAngle = travellingAngle;
 		float angleBetween = (destAngle - currentAngle + 360) % 360;
-		if (angleBetween > 120 && angleBetween <240){
+		if (angleBetween > 100 && angleBetween <260){
 			return false;
 		}
 		return true;

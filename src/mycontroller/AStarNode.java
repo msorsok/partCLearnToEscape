@@ -108,10 +108,6 @@ public class AStarNode extends Node{
 		AStarNode curr = this;
 		ArrayList<Coordinate> path = new ArrayList<>();
 		while(curr != null){
-			if (map.get(curr.coordinate) instanceof LavaTrap){
-				System.out.println("how is the lava part of the path");
-				//System.out.println(curr.costFromStart);
-			}
 			path.add(0, curr.coordinate);
 			curr = curr.pathParent;
 		}		

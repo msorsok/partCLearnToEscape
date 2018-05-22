@@ -65,6 +65,7 @@ public class AStarNode{
 			path.add(0, curr.coordinate);
 			curr = curr.pathParent;
 		}		
+		path.remove(0);
 		return path;
 	}
 }

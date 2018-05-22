@@ -22,9 +22,6 @@ public class AStarSearch {
 		while(!open.isEmpty()){
 			open.sort(AStarNode.NodeComparator);
 			curr = open.remove(0);
-
-			System.out.print("entered while loop exploring node: ");
-			System.out.println(curr.getCoordinate());
 			openHashMap.remove(curr.getCoordinate());
 			closedHashMap.put(curr.getCoordinate(), curr);
 			if (curr.getCoordinate().equals(dest)){
@@ -76,7 +73,6 @@ public class AStarSearch {
 				default:
 					System.out.println("not a direction");	
 					}
-			
 			MapTile newMapTile = gameState.combinedMap.get(newCoordinate);
 			if(newMapTile != null){
 				switch(newMapTile.getType()){

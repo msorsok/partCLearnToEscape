@@ -7,6 +7,7 @@ import tiles.LavaTrap;
 import tiles.MapTile;
 import utilities.Coordinate;
 import world.World;
+import world.WorldSpatial;
 
 public class ExploreStrategy implements PathStrategy{
 	private final int unseenWeight = 9;
@@ -32,7 +33,7 @@ public class ExploreStrategy implements PathStrategy{
 		Coordinate bestDest = null;
 		float highestUtility = -Float.MAX_VALUE;
 		float thisUtility;
-		for(Coordinate dest: gameState.combinedMap.keySet()) {
+		for(Coordinate dest: getReachable(gameState)) {
 			thisUtility = calculateUtility(dest, gameState);
 				if(thisUtility > highestUtility){
 					bestDest = dest;
@@ -97,6 +98,51 @@ public class ExploreStrategy implements PathStrategy{
 			}
 		}
 		return lava;
+	}
+	
+	private ArrayList<Coordinate> getReachable(GameState gameState){
+		ArrayList <Coordinate> reachable = new ArrayList<>();
+		ArrayList <Coordinate> q = new ArrayList<>();
+		Coordinate curr;
+		q.add(gameState.carState.position);
+		while(!q.isEmpty()){
+			curr = q.remove(0);
+			if (!reachable.contains(curr)){
+				reachable.add(curr);
+				for (WorldSpatial.Direction d: WorldSpatial.Direction.values()){
+					Coordinate newCoordinate = null;
+					switch(d) {
+						case EAST:
+							newCoordinate = new Coordinate(curr.x + 1, curr.y);
+							break;
+						case WEST:
+							newCoordinate = new Coordinate(curr.x - 1, curr.y);
+							break;
+						case NORTH:
+							newCoordinate = new Coordinate(curr.x, curr.y + 1);
+							break;
+						case SOUTH:
+							newCoordinate = new Coordinate(curr.x, curr.y - 1);
+							break;
+						default:
+							System.out.println("not a direction");	
+							}
+					
+					MapTile newMapTile = gameState.combinedMap.get(newCoordinate);
+					if(newMapTile != null && newMapTile.getType()!= MapTile.Type.WALL){
+						q.add(0, newCoordinate);
+					}
+				}			
+			}
+		}
+		reachable.remove(0);
+		System.out.print("reachable.size()-----------");
+		System.out.println(reachable.size());
+		if (reachable.contains(null)){
+			System.out.println("how?????");
+			System.exit(0);
+		}
+		return reachable;
 	}
 }
 

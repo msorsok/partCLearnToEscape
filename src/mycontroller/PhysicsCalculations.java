@@ -16,10 +16,11 @@ public class PhysicsCalculations {
 		return true;
 	}
 	
-	public static Boolean getTurningRight(float srcX, float srcY, float destX, float destY, float travellingAngle, boolean reversing){
+	public static Boolean getTurningRight(float srcX, float srcY, float destX, float destY, float travellingAngle, float speed){
 		float destAngle = getAngleToDest(destX, destY, srcX, srcY);
 		float currentAngle = travellingAngle;
 		float angleBetween = (destAngle - currentAngle + 360) % 360;
+		boolean reversing = speed<0 ? true: false;
 		if(angleBetween >= 180 && angleBetween < 360 && !reversing) {
 			return true;
 		}

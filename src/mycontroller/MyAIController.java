@@ -43,6 +43,23 @@ public class MyAIController extends CarController{
 		ArrayList<Coordinate> path = pathFinder.findPath(gameState);
 		System.out.print("path is: ");
 		System.out.println(path);
+		gameState.updateLastPath(path);
+		ArrayList<Boolean> instructions = CarMover.getInstructions(path, gameState);
+		System.out.println(instructions);
+		if (instructions.get(1) == null){
+		}
+		else if (instructions.get(1)){
+			turnRight(delta);
+		}
+		else{
+			turnLeft(delta);
+		}
+		if (instructions.get(0)){
+			applyForwardAcceleration();
+		}
+		else{
+			applyReverseAcceleration();
+		}
 		}
 	
 	private ArrayList<Coordinate> findStraightPathOut(Coordinate startingCoodinate){

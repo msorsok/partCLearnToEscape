@@ -7,7 +7,6 @@ import controller.CarController;
 import tiles.HealthTrap;
 import tiles.LavaTrap;
 import tiles.MapTile;
-import tiles.TrapTile;
 import utilities.Coordinate;
 import world.Car;
 import world.World;
@@ -16,196 +15,34 @@ import world.WorldSpatial;
 
 public class MyAIController extends CarController{
 	
-	public HashMap<Coordinate, MapTile> map;
-	private HashMap<Coordinate, MapTile> alternateMap;
-
 	// Car Speed to move at
 	private float CAR_SPEED = 3f;
 	private final float WALL_MARGIN = 0.2f;
 	private final float RESET_DELTAS = 5;
 	
-	private ArrayList<Double> previousSpeeds;
 	private boolean previousTurningRight = true;
 	private float previousHealth;
 	private int resetDeltaCount;
 	private boolean isResetting = false;
 	
+	private GameState gameState;
+	private PathFinder pathFinder;
+	
 	
 	public MyAIController(Car car) {
 		super(car);
-		initialiseMap();
-		previousSpeeds = new ArrayList<>();
-		previousSpeeds.add((double)-1);
+		this.pathFinder = new PathFinder();
+		this.gameState = new GameState(getPosition(), getAngle(), getSpeed(), getHealth(), getKey(), CAR_SPEED);
 	}
-	Coordinate initialGuess;
-	boolean notSouth = true;
 
 	@Override
 	public void update(float delta) {
+		System.out.println("updating");
 		HashMap<Coordinate, MapTile> currentView = getView();
-		updateMap(currentView);
-		Coordinate currCoordinates = new Coordinate(getPosition());
-		MapTile currTile = map.get(currCoordinates);
-		ArrayList<Coordinate> reachable = null;
-
-		if (isResetting){
-			reset(delta);
-		}		
-		else if (currTile instanceof HealthTrap && getHealth() < 95){
-			if (getSpeed()<0){
-				applyForwardAcceleration();
-			}
-			else if(getSpeed() > 0){
-				applyReverseAcceleration();
-			}
-		}
-		
-		else{
-				Coordinate dest;
-				boolean gettingKey = false;
-				if ((dest = getDestKey()) != null && getHealth() > 60){
-					if (dest!=null){
-						gettingKey = true;
-						System.out.println("going to get a key now" + getKey());
-					}
-				}
-				else{
-					reachable = getReachable(currCoordinates);
-					dest = getDestination(reachable, currCoordinates);
-
-				}
-				if (dest == null){
-					System.out.println("no where to go!!!!!!");
-					return;
-				}
-				boolean reversing = getSpeed() < 0 ? true : false;
-				System.out.print("src: ");
-				System.out.println(currCoordinates);
-				System.out.print("dest: ");
-				System.out.println(dest);
-				if (currCoordinates == null || dest == null){
-					System.out.println("a null src or dest ");
-				}
-
-				ArrayList<Coordinate> path = findPath(currCoordinates, dest, map);
-				
-				//Check if we really need to go to this health trap
-				if(checkPathForLava(path, map) > 1 ) {
-						ArrayList<Coordinate> newPath = findPath(currCoordinates, dest, alternateMap);
-						System.out.println("Actual path" + newPath);
-						if(checkPathForLava(newPath, alternateMap) < checkPathForLava(path, map) ) {
-								path = newPath;
-					}
-				}
-				
-				if(currTile instanceof LavaTrap) {
-					
-					ArrayList<Coordinate> straightPath = findStraightPathOut(currCoordinates);
-					System.out.println("Orientation " + getOrientation());
-					System.out.println("Orientation " + getOrientation());
-					System.out.println("Orientation " + getOrientation());
-					System.out.println("Orientation " + getOrientation());
-
-					if(straightPath != null) {
-						ArrayList<Coordinate> adjustedPath = findPath(straightPath.get(straightPath.size()-1), dest, alternateMap);
-						if (path.get(0).equals(currCoordinates)){
-							path.remove(0);
-						}
-						if (adjustedPath.get(0).equals(currCoordinates)){
-							path.remove(0);
-							
-						}
-						int currentLavaToDest = checkPathForLava(path, map);
-						int alternateLavaToDest = checkPathForLava(adjustedPath, alternateMap);;
-						if(currentLavaToDest > alternateLavaToDest) {
-							path = straightPath;
-						}
-					};
-					System.out.println("New path " + path);
-
-				}
-				if (path.get(0).equals(currCoordinates)){
-					path.remove(0);
-				}
-			
-				
-				
-				ArrayList<Float> destCoordinates  = adjustAwayFromWall(path.get(0));
-				Boolean isAcceleratingForward = PhysicsCalculations.acceleratingForward(getX(), getY(),  destCoordinates.get(0), destCoordinates.get(1), getAngle());
-				Boolean isTurningRight = PhysicsCalculations.getTurningRight(getX(), getY(),  destCoordinates.get(0), destCoordinates.get(1), getAngle(), reversing);
-
-				if (getSpeed() < 00.01 &&getSpeed() > -00.01 && previousSpeeds.size() > 1 && isStationary(previousSpeeds.get(1))){
-					System.out.println("starting a new reset");
-					initialiseReset();
-					reset(delta);
-				}
-				else if(map.get(path.get(0)) instanceof HealthTrap && getHealth() < 50 && Math.abs(getSpeed()) > 0.5 ){
-					if (isTurningRight != null){
-						if(isTurningRight){
-							turnRight(delta);
-						}
-						else{
-							turnLeft(delta);
-						}	
-					}
-					if (isAcceleratingForward){
-						applyReverseAcceleration();
-						
-					}
-					else {
-						applyForwardAcceleration();
-
-					}
-				}
-				else if((currTile instanceof LavaTrap)) {
-					System.out.println(path);
-
-					System.out.println("Justified crazy acceleration");
-					if (isTurningRight != null){
-						if(isTurningRight){
-							turnRight(delta);
-						}
-						else{
-							turnLeft(delta);
-						}	
-					}
-					if (isAcceleratingForward){
-							applyForwardAcceleration();
-							
-						}
-					else {
-						applyReverseAcceleration();
-
-						}
-					
-				}
-				else{
-					if (isTurningRight != null){
-						if(isTurningRight){
-							turnRight(delta);
-						}
-						else{
-							turnLeft(delta);
-						}	
-					}
-					if (isAcceleratingForward){
-						if(getSpeed() < CAR_SPEED){
-							applyForwardAcceleration();
-						}
-					}
-					else{
-						if(getSpeed() > CAR_SPEED){
-							applyReverseAcceleration();
-						}
-					}
-					
-				}
-				
-			}
-			previousSpeeds.add((double)getSpeed());
-			if (previousSpeeds.size()>5){
-				previousSpeeds.remove(0);
-			}
+		gameState.updateGameState(currentView, getPosition(), getAngle(), getSpeed(), getHealth(), getKey());
+		ArrayList<Coordinate> path = pathFinder.findPath(gameState);
+		System.out.print("path is: ");
+		System.out.println(path);
 		}
 	
 	private ArrayList<Coordinate> findStraightPathOut(Coordinate startingCoodinate){
@@ -444,7 +281,7 @@ public class MyAIController extends CarController{
 			totalUtility -= 1000 ;
 		}
 		else if(tile instanceof HealthTrap){
-			totalUtility += Math.pow(100 - getHealth(), 2) ;
+			totalUtility += Math.pow(100 - getHealth(), 2);
 			//System.out.println("health tile being considered");
 			//System.out.print("the utility of this tile is: ");
 			//System.out.println(totalUtility);
@@ -457,9 +294,6 @@ public class MyAIController extends CarController{
 		return totalUtility;
 	}
 	
-	private float getEuclideanDistance(Coordinate src, Coordinate dest) {
-		return (float) Math.sqrt(Math.pow(Math.abs(src.x - dest.x), 2) + Math.pow(Math.abs(src.y - dest.y), 2));
-	}
 	
 	private int getUnseen(Coordinate c) {
 		int unseen = 0;

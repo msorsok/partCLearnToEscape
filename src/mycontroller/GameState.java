@@ -37,12 +37,13 @@ public class GameState {
 	public void updateGameState(HashMap<Coordinate, MapTile> view, String position, float angle, float speed, float health, int currKey){
 		//update car
 		this.carState.updateCarState(position, angle, speed, health);
+		this.currKey = currKey;
 		//updating both maps with new view
 		for (Coordinate c: view.keySet()){
 			if (!(this.exploredMap.containsKey(c)) && !(view.get(c).getType().equals(MapTile.Type.EMPTY))){
 				this.exploredMap.put(c, view.get(c));
 			}
-			if(!(view.get(c).getType().equals(MapTile.Type.EMPTY)) && !(view.get(c).getType().equals(MapTile.Type.ROAD) && (view.get(c).getType().equals(MapTile.Type.WALL))) ) {
+			if(!(view.get(c).getType().equals(MapTile.Type.EMPTY))){
 				this.combinedMap.remove(c);
 				this.combinedMap.put(c, view.get(c));
 			}

@@ -11,7 +11,7 @@ import world.World;
 import world.WorldSpatial;
 
 public class ExploreStrategy implements PathStrategy{
-	private final int unseenWeight = 9;
+	private final int unseenWeight = 5;
 	private final int distanceWeight = -1;
 	
 	
@@ -45,6 +45,16 @@ public class ExploreStrategy implements PathStrategy{
 					highestUtility = thisUtility;
 				}
 		}
+		if (getUnseen(bestDest, gameState) < 9){
+			highestUtility = -Float.MAX_VALUE;
+			for(Coordinate dest: getReachable(gameState, true)) {
+				thisUtility = calculateUtility(dest, gameState);
+					if(thisUtility > highestUtility){
+						bestDest = dest;
+						highestUtility = thisUtility;
+					}
+			}
+		}
 		return bestDest;
 	}
 		
@@ -70,7 +80,17 @@ public class ExploreStrategy implements PathStrategy{
 			totalUtility -= 2000;
 		}
 		if(thisTile instanceof HealthTrap){
-			totalUtility += 40000000/Math.pow(gameState.carState.health, 3);
+			totalUtility += 400 * Math.sin((-gameState.carState.health)/40 + 1) + 400;
+			System.out.print("health_utility: ");
+			System.out.println(totalUtility);
+			/*
+			if(gameState.carState.health < 50){
+				totalUtility+=10000;
+			}
+			else{
+				totalUtility += 100 - gameState.carState.health;
+			}
+			*/
 		}
 		return totalUtility;
 	}
@@ -144,6 +164,8 @@ public class ExploreStrategy implements PathStrategy{
 			System.out.println("how?????");
 			System.exit(0);
 		}
+		System.out.print("-----reachable.size-----");
+		System.out.println(reachable.size());
 		return reachable;
 	}
 	private int checkPathForLava(ArrayList<Coordinate> path, GameState gameState) {

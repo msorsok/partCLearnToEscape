@@ -41,7 +41,7 @@ public class MyAIController extends CarController{
 		HashMap<Coordinate, MapTile> currentView = getView();
 		gameState.updateGameState(currentView, getPosition(), getAngle(), getSpeed(), getHealth(), getKey());
 		ArrayList<Coordinate> path = pathFinder.findPath(gameState);
-		System.out.print(gameState.combinedMap.get(path.get(0)).getType());
+		System.out.println(gameState.combinedMap.get(path.get(0)).getType());
 		System.out.print("path: ");
 		System.out.println(path);
 		ArrayList<Boolean> instructions = carMover.getInstructions(path, gameState);
@@ -58,10 +58,15 @@ public class MyAIController extends CarController{
 		if (instructions.get(0) == null){
 		}
 		else if(instructions.get(0)){
-			applyForwardAcceleration();
+			if (getSpeed()<CAR_SPEED){
+				applyForwardAcceleration();
+			}
 		}
 		else{
-			applyReverseAcceleration();
+			if (getSpeed()<CAR_SPEED){
+				applyReverseAcceleration();
+			}
+			
 		}
 		if(path != null && path.get(0).equals(new Coordinate(35,19))){
 			System.out.println("Health");

@@ -30,18 +30,20 @@ public class KeyStrategy implements PathStrategy{
 	public Coordinate findDest(GameState gameState){
 		Coordinate dest = null;
 		for (Coordinate c: gameState.exploredMap.keySet()){
-			if(!c.equals(gameState.carState.position)){
-				MapTile t = gameState.exploredMap.get(c);
-					if (gameState.currKey == 1){
-						if (t.getType().equals(MapTile.Type.FINISH)){
-							return c;
-						}
+			MapTile t = gameState.exploredMap.get(c);
+				if (gameState.currKey == 1){
+					if (t.getType().equals(MapTile.Type.FINISH)){
+						return c;
 					}
-					else{
-						if (t instanceof LavaTrap){
-							if (((LavaTrap) t).getKey() == (gameState.currKey - 1)){
-								return c;
-							}
+				}
+				else{
+					if (t instanceof LavaTrap){
+						if (((LavaTrap) t).getKey() > 0){
+							System.out.print("in exploredMap key is: ");
+							System.out.println(((LavaTrap) t).getKey());
+						}
+						if (((LavaTrap) t).getKey() == (gameState.currKey - 1)){
+							return c;
 						}
 					}
 				}

@@ -12,14 +12,18 @@ public class EmergencyStrategy implements PathStrategy{
 	private boolean isEmergency = false;
 	public ArrayList<Coordinate> findPath(GameState gameState){
 		ArrayList<Coordinate> path = null;
-		if (isZero(gameState.carState.speed) && isZero(gameState.carState.previousSpeed) && emergencyDeltaCount==0){
+		if (isZero(gameState.carState.speed) && isZero(gameState.carState.previousSpeed) && emergencyDeltaCount==0
+				&& !gameState.lastPath.get(gameState.lastPath.size()-1).equals(gameState.carState.position)){
+			//not moving, not currently in an emergency cycle, probably stuck, initiate emergency
 			isEmergency = true;
 		}
 		if (emergencyDeltaCount>DELTA_COUNT){
+			//cycle complete end emergency
 			isEmergency = false;
 			emergencyDeltaCount = 0;
 		}
 		if(isEmergency){
+			
 			path = new ArrayList<>();
 			Coordinate curr = gameState.carState.position;
 			int newX = curr.x;

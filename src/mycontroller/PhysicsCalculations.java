@@ -6,14 +6,14 @@ public class PhysicsCalculations {
 	 * From a given source to a given destination, calculates whether to turn right or left 
 	 * @return  left if angle is between (0,180), right (180,360) and null otherwise
 	 */
-	public static boolean acceleratingForward(float srcX, float srcY, float destX, float destY, float travellingAngle){
+	public static boolean acceleratingForward(float srcX, float srcY, float destX, float destY, float travellingAngle, boolean isEmergency){
 		float destAngle = getAngleToDest(destX, destY, srcX, srcY);
 		float currentAngle = travellingAngle;
 	//	System.out.print("currentAngle: ");
 	//	System.out.println(currentAngle);
 		float angleBetween = (destAngle - currentAngle + 360) % 360;
-		if (angleBetween > 120 && angleBetween <240){
-			return false;
+		if(isEmergency) {
+				return false;
 		}
 		return true;
 	}

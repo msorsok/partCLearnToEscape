@@ -46,6 +46,10 @@ public class MyAIController extends CarController{
 		System.out.println(path);
 		ArrayList<Boolean> instructions = carMover.getInstructions(path, gameState);
 		//System.out.println(instructions);
+		boolean goingForHealth = false;
+		if(gameState.combinedMap.get(path.get(path.size()-1)) instanceof HealthTrap && path.size() < 2 && getSpeed() > 0.1) {
+			goingForHealth = true;
+		}
 		if (instructions.get(1) == null){
 		}
 		else if (instructions.get(1)){
@@ -58,18 +62,15 @@ public class MyAIController extends CarController{
 		if (instructions.get(0) == null){
 		}
 		else if(instructions.get(0)){
-			if (getSpeed()<CAR_SPEED){
+			if ((( !goingForHealth && getSpeed()<CAR_SPEED)|| gameState.combinedMap.get(gameState.carState.position) instanceof LavaTrap)){
 				applyForwardAcceleration();
 			}
 		}
 		else{
-			if (getSpeed()<CAR_SPEED){
+			if (getSpeed()<CAR_SPEED || gameState.combinedMap.get(gameState.carState.position) instanceof LavaTrap){
 				applyReverseAcceleration();
 			}
 			
-		}
-		if(path != null && path.get(0).equals(new Coordinate(35,19))){
-			System.out.println("Health");
 		}
 	}
 	

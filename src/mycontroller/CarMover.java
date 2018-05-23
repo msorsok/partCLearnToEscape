@@ -20,7 +20,7 @@ public class CarMover {
 		}
 		ArrayList<Float> adjustedDest  = adjustAwayFromWall(firstDest, gameState);
 		instructions.add(PhysicsCalculations.acceleratingForward(gameState.carState.position.x, gameState.carState.position.y,
-				adjustedDest.get(0), adjustedDest.get(1), gameState.carState.angle));
+				adjustedDest.get(0), adjustedDest.get(1), gameState.carState.angle, gameState.isEmergency));
 		instructions.add(PhysicsCalculations.getTurningRight(gameState.carState.position.x, gameState.carState.position.y,
 				adjustedDest.get(0), adjustedDest.get(1), gameState.carState.angle, this.previousAccelerateForward));
 		previousAccelerateForward = instructions.get(0);

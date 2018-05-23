@@ -9,20 +9,19 @@ import world.WorldSpatial;
 public class EmergencyStrategy implements PathStrategy{
 	private final int DELTA_COUNT = 10;
 	private int emergencyDeltaCount = 0;
-	private boolean isEmergency = false;
 	public ArrayList<Coordinate> findPath(GameState gameState){
 		ArrayList<Coordinate> path = null;
 		if (isZero(gameState.carState.speed) && isZero(gameState.carState.previousSpeed) && emergencyDeltaCount==0
 				&& !gameState.lastPath.get(gameState.lastPath.size()-1).equals(gameState.carState.position)){
 			//not moving, not currently in an emergency cycle, probably stuck, initiate emergency
-			isEmergency = true;
+			gameState.isEmergency = true;
 		}
 		if (emergencyDeltaCount>DELTA_COUNT){
 			//cycle complete end emergency
-			isEmergency = false;
+			gameState.isEmergency = false;
 			emergencyDeltaCount = 0;
 		}
-		if(isEmergency){
+		if(gameState.isEmergency){
 			
 			path = new ArrayList<>();
 			Coordinate curr = gameState.carState.position;

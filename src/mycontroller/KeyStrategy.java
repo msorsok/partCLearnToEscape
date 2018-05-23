@@ -8,6 +8,10 @@ import utilities.Coordinate;
 
 public class KeyStrategy implements PathStrategy{
 	public ArrayList<Coordinate> findPath(GameState gameState){
+		MapTile currTile = gameState.combinedMap.get(gameState.carState.position);
+		if (currTile instanceof LavaTrap && ((LavaTrap) currTile).getKey() == gameState.currKey - 1){
+			return null;
+		}
 		Coordinate dest = findDest(gameState);
 		if (dest == null){
 			return null;

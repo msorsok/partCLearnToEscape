@@ -75,22 +75,23 @@ public class ExploreStrategy implements PathStrategy{
 		float distance = getManhattanDistance(gameState.carState.position, dest);
 		totalUtility += distanceWeight * distance;
 		
-		if(unseen == 0) {
+		if(unseen == 0 && !(thisTile instanceof HealthTrap)) {
 			//never set dest as tile with unseen == 0
 			totalUtility -= 2000;
 		}
 		if(thisTile instanceof HealthTrap){
+			/*
 			totalUtility += 400 * Math.sin((-gameState.carState.health)/40 + 1) + 400;
 			System.out.print("health_utility: ");
 			System.out.println(totalUtility);
-			/*
+			*/
 			if(gameState.carState.health < 50){
 				totalUtility+=10000;
 			}
 			else{
 				totalUtility += 100 - gameState.carState.health;
 			}
-			*/
+			
 		}
 		return totalUtility;
 	}

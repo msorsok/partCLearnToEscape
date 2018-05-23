@@ -9,6 +9,8 @@ public class PhysicsCalculations {
 	public static boolean acceleratingForward(float srcX, float srcY, float destX, float destY, float travellingAngle){
 		float destAngle = getAngleToDest(destX, destY, srcX, srcY);
 		float currentAngle = travellingAngle;
+	//	System.out.print("currentAngle: ");
+	//	System.out.println(currentAngle);
 		float angleBetween = (destAngle - currentAngle + 360) % 360;
 		if (angleBetween > 120 && angleBetween <240){
 			return false;
@@ -16,21 +18,20 @@ public class PhysicsCalculations {
 		return true;
 	}
 	
-	public static Boolean getTurningRight(float srcX, float srcY, float destX, float destY, float travellingAngle, float speed){
+	public static Boolean getTurningRight(float srcX, float srcY, float destX, float destY, float travellingAngle, Boolean previousAcceleration){
 		float destAngle = getAngleToDest(destX, destY, srcX, srcY);
 		float currentAngle = travellingAngle;
 		float angleBetween = (destAngle - currentAngle + 360) % 360;
-		boolean reversing = speed<0 ? true: false;
-		if(angleBetween >= 180 && angleBetween < 360 && !reversing) {
+		if(angleBetween >= 180 && angleBetween < 360 && previousAcceleration) {
 			return true;
 		}
-		else if(angleBetween > 0 && angleBetween < 180 && !reversing) {
+		else if(angleBetween > 0 && angleBetween < 180 && previousAcceleration) {
 			return false;
 		}
-		else if(angleBetween >= 180 && angleBetween < 360 && reversing) {
+		else if(angleBetween >= 180 && angleBetween < 360 && !previousAcceleration) {
 			return false;
 		}
-		else if(angleBetween > 0 && angleBetween < 180 && reversing) {
+		else if(angleBetween > 0 && angleBetween < 180 && !previousAcceleration) {
 			return true;
 		}
 		return null;

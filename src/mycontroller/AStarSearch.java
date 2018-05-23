@@ -27,7 +27,9 @@ public class AStarSearch {
 			if (curr.getCoordinate().equals(dest)){
 				// found dest
 				System.out.print("found dest: ");
-				System.out.println(curr.getCoordinate());
+				System.out.print(curr.getCoordinate());
+				System.out.print("--");
+				System.out.println(curr.getCost());
 				return curr.tracePath();
 			}
 			
@@ -92,7 +94,7 @@ public class AStarSearch {
 							}
 						break;
 					default:
-						successors.add(new AStarNode(newCoordinate, curr, curr.getCostFromStart() + 5, curr.getDest()));
+						successors.add(new AStarNode(newCoordinate, curr, curr.getCostFromStart() + 100, curr.getDest()));
 				}
 			}
 		}

@@ -47,7 +47,7 @@ public class AStarNode{
 
 	private float heuristic(Coordinate dest){
 		// manhattan distance scaled up by 5
-		return 5 * Math.abs(coordinate.x - dest.x) + Math.abs(coordinate.y - dest.y);
+		return 100 * Math.abs(coordinate.x - dest.x) + Math.abs(coordinate.y - dest.y);
 	}
 	
 	public Coordinate getCoordinate(){

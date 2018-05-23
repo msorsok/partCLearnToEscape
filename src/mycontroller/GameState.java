@@ -16,7 +16,7 @@ public class GameState {
 	ArrayList<Coordinate> lastPath;
 	
 	public GameState(String position, float angle, float speed, float health, int currKey, float maxSpeed){
-		this.carState = new CarState(position, angle, health);
+		this.carState = new CarState(position, angle, health, speed);
 		this.currKey = currKey;
 		this.maxSpeed = maxSpeed;
 		this.exploredMap = new HashMap<>();
@@ -30,6 +30,8 @@ public class GameState {
 				this.combinedMap.put(c, World.getMap().get(c));
 			}
 		}
+		this.lastPath = new ArrayList<>();
+		lastPath.add(carState.position);
 	}
 	
 	public void updateGameState(HashMap<Coordinate, MapTile> view, String position, float angle, float speed, float health, int currKey){

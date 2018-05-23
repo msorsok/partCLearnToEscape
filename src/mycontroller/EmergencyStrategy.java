@@ -7,16 +7,24 @@ import utilities.Coordinate;
 import world.WorldSpatial;
 
 public class EmergencyStrategy implements PathStrategy{
+	private final int DELTA_COUNT = 10;
+	private int emergencyDeltaCount = 0;
+	private boolean isEmergency = false;
 	public ArrayList<Coordinate> findPath(GameState gameState){
 		ArrayList<Coordinate> path = null;
-		if (isZero(gameState.carState.previousSpeeds.get(gameState.carState.previousSpeeds.size()-1)) && isZero(gameState.carState.previousSpeeds.get(gameState.carState.previousSpeeds.size()-2))){
+		if (isZero(gameState.carState.speed) && isZero(gameState.carState.previousSpeed) && emergencyDeltaCount==0){
+			isEmergency = true;
+		}
+		if (emergencyDeltaCount>DELTA_COUNT){
+			isEmergency = false;
+			emergencyDeltaCount = 0;
+		}
+		if(isEmergency){
 			path = new ArrayList<>();
 			Coordinate curr = gameState.carState.position;
-			int newX;
-			int newY;
+			int newX = curr.x;
+			int newY = curr.y;
 			Coordinate lastDest = gameState.lastPath.get(0);
-			newX = 2*curr.x - lastDest.x;
-			newY = 2*curr.y - lastDest.y;
 			for (WorldSpatial.Direction d: WorldSpatial.Direction.values()){
 				
 				Coordinate newCoordinate = null;
@@ -37,12 +45,47 @@ public class EmergencyStrategy implements PathStrategy{
 						System.out.println("not a direction");	
 						}
 				if (gameState.combinedMap.get(newCoordinate).getType().equals(MapTile.Type.WALL)){
-					newX = 2*gameState.carState.position.x - newCoordinate.x;
-					newY = 2*gameState.carState.position.y - newCoordinate.y;
+					newX = 2*newX - newCoordinate.x;
+					newY = 2*newY - newCoordinate.y;
 					break;
 				}
 			}
+			if (newX==curr.x && newY==curr.y){
+				//no walls were found in cardinal directions need to check corners too
+				for (WorldSpatial.Direction d: WorldSpatial.Direction.values()){
+					Coordinate newCoordinate = null;
+					switch(d) {
+						case EAST:
+							//actually northeast
+							newCoordinate = new Coordinate(curr.x + 1, curr.y+1);
+							break;
+						case WEST:
+							//actually southwest
+							newCoordinate = new Coordinate(curr.x - 1, curr.y-1);
+							break;
+						case NORTH:
+							//actually northwest
+							newCoordinate = new Coordinate(curr.x-1, curr.y + 1);
+							break;
+						case SOUTH:
+							//actually southeast
+							newCoordinate = new Coordinate(curr.x+1, curr.y - 1);
+							break;
+						default:
+							System.out.println("not a direction");	
+							}
+					if (gameState.combinedMap.get(newCoordinate).getType().equals(MapTile.Type.WALL)){
+						newX = 2*newX - newCoordinate.x;
+						newY = 2*newY - newCoordinate.y;
+						break;
+					}
+				}
+			}
+
+			newX = 2*curr.x - lastDest.x;
+			newY = 2*curr.y - lastDest.y;
 			path.add(new Coordinate(newX, newY));
+			emergencyDeltaCount++;
 			return path;
 		}
 		return path;

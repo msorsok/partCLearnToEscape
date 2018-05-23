@@ -1,6 +1,7 @@
 package mycontroller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import tiles.HealthTrap;
 import tiles.LavaTrap;
@@ -18,14 +19,18 @@ public class ExploreStrategy implements PathStrategy{
 		ArrayList<Coordinate> path;
 		Coordinate dest = null;
 		dest = findDest(gameState);
-		System.out.print("exploring dest is: ");
-		System.out.println(dest);
-		float lavaCost = 150 - gameState.carState.health;
-		float healthCost = 5 - gameState.carState.health/20;
-		float grassCost = 7;
+		if (dest.equals(gameState.carState.position)){
+			//dest is current position
+			path = new ArrayList<>();
+			path.add(dest);
+			return path;
+			
+		}
+		float lavaCost = 3000 - gameState.carState.health;
+		float healthCost = gameState.carState.health;
+		float grassCost = 120;
 		path = AStarSearch.findPath(gameState.carState.position, dest, lavaCost, healthCost, grassCost, gameState);
-		System.out.print("exploring path is: ");
-		System.out.println(path);
+		
 		return path;
 	}
 	
@@ -33,7 +38,7 @@ public class ExploreStrategy implements PathStrategy{
 		Coordinate bestDest = null;
 		float highestUtility = -Float.MAX_VALUE;
 		float thisUtility;
-		for(Coordinate dest: getReachable(gameState)) {
+		for(Coordinate dest: getReachable(gameState, false)) {
 			thisUtility = calculateUtility(dest, gameState);
 				if(thisUtility > highestUtility){
 					bestDest = dest;
@@ -65,7 +70,7 @@ public class ExploreStrategy implements PathStrategy{
 			totalUtility -= 2000;
 		}
 		if(thisTile instanceof HealthTrap){
-			totalUtility += 10000000/Math.pow(gameState.carState.health, 3);
+			totalUtility += 40000000/Math.pow(gameState.carState.health, 3);
 		}
 		return totalUtility;
 	}
@@ -100,7 +105,7 @@ public class ExploreStrategy implements PathStrategy{
 		return lava;
 	}
 	
-	private ArrayList<Coordinate> getReachable(GameState gameState){
+	private ArrayList<Coordinate> getReachable(GameState gameState, Boolean includeLava){
 		ArrayList <Coordinate> reachable = new ArrayList<>();
 		ArrayList <Coordinate> q = new ArrayList<>();
 		Coordinate curr;
@@ -129,20 +134,26 @@ public class ExploreStrategy implements PathStrategy{
 							}
 					
 					MapTile newMapTile = gameState.combinedMap.get(newCoordinate);
-					if(newMapTile != null && newMapTile.getType()!= MapTile.Type.WALL){
+					if(newMapTile != null && newMapTile.getType()!= MapTile.Type.WALL && (includeLava || !(newMapTile instanceof LavaTrap))){
 						q.add(0, newCoordinate);
 					}
 				}			
 			}
 		}
-		reachable.remove(0);
-		System.out.print("reachable.size()-----------");
-		System.out.println(reachable.size());
 		if (reachable.contains(null)){
 			System.out.println("how?????");
 			System.exit(0);
 		}
 		return reachable;
+	}
+	private int checkPathForLava(ArrayList<Coordinate> path, GameState gameState) {
+		int lavaCrossed = 0;
+		for(Coordinate c: path) {
+			if(gameState.combinedMap.get(c) instanceof LavaTrap) {
+				lavaCrossed ++;
+			}
+		}
+		return lavaCrossed;
 	}
 }
 

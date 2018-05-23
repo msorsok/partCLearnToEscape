@@ -17,7 +17,6 @@ public class MyAIController extends CarController{
 	
 	// Car Speed to move at
 	private float CAR_SPEED = 3f;
-	private final float WALL_MARGIN = 0.2f;
 	private final float RESET_DELTAS = 5;
 	
 	private boolean previousTurningRight = true;
@@ -27,25 +26,26 @@ public class MyAIController extends CarController{
 	
 	private GameState gameState;
 	private PathFinder pathFinder;
+	private CarMover carMover;
 	
 	
 	public MyAIController(Car car) {
 		super(car);
 		this.pathFinder = new PathFinder();
 		this.gameState = new GameState(getPosition(), getAngle(), getSpeed(), getHealth(), getKey(), CAR_SPEED);
+		this.carMover = new CarMover();
 	}
 
 	@Override
 	public void update(float delta) {
-		System.out.println("updating");
 		HashMap<Coordinate, MapTile> currentView = getView();
 		gameState.updateGameState(currentView, getPosition(), getAngle(), getSpeed(), getHealth(), getKey());
 		ArrayList<Coordinate> path = pathFinder.findPath(gameState);
-		System.out.print("path is: ");
+		System.out.print(gameState.combinedMap.get(path.get(0)).getType());
+		System.out.print("path: ");
 		System.out.println(path);
-		gameState.updateLastPath(path);
-		ArrayList<Boolean> instructions = CarMover.getInstructions(path, gameState);
-		System.out.println(instructions);
+		ArrayList<Boolean> instructions = carMover.getInstructions(path, gameState);
+		//System.out.println(instructions);
 		if (instructions.get(1) == null){
 		}
 		else if (instructions.get(1)){
@@ -54,13 +54,19 @@ public class MyAIController extends CarController{
 		else{
 			turnLeft(delta);
 		}
-		if (instructions.get(0)){
+		
+		if (instructions.get(0) == null){
+		}
+		else if(instructions.get(0)){
 			applyForwardAcceleration();
 		}
 		else{
 			applyReverseAcceleration();
 		}
+		if(path != null && path.get(0).equals(new Coordinate(35,19))){
+			System.out.println("Health");
 		}
+	}
 	
 	private ArrayList<Coordinate> findStraightPathOut(Coordinate startingCoodinate){
 		int xIncrement = 0;

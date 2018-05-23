@@ -16,9 +16,9 @@ public class KeyStrategy implements PathStrategy{
 		ArrayList<Coordinate> path;
 		
 		// include logic for changing costs depending on current key and other squares etc.
-		float lavaCost = 150 - gameState.carState.health;
-		float healthCost = 5 - gameState.carState.health/20;
-		float grassCost = 7;
+		float lavaCost = 300 - gameState.carState.health;
+		float healthCost = gameState.carState.health;
+		float grassCost = 120;
 		path = AStarSearch.findPath(gameState.carState.position, dest, lavaCost, healthCost, grassCost, gameState);
 
 		if (willSurvive(path, gameState)){
@@ -54,7 +54,7 @@ public class KeyStrategy implements PathStrategy{
 	}
 	private float lavaPathCost(ArrayList<Coordinate> path, GameState gameState) {
 		int lavaCrossed = 0;
-		for(Coordinate c: path) {
+		for(Coordinate c: path){
 			if(gameState.combinedMap.get(c) instanceof LavaTrap) {
 				lavaCrossed ++;
 			}

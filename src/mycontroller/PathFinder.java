@@ -19,15 +19,18 @@ public class PathFinder implements PathStrategy {
 	public ArrayList<Coordinate> findPath(GameState gameState){
 		ArrayList<Coordinate> path = emergencyStrategy.findPath(gameState);
 		if (path != null){
-			System.out.println("doing emergency");
+			System.out.print("Emergency--");
 			return path;
 		}
 		path = keyStrategy.findPath(gameState);
 		if (path != null){
-			System.out.println("doing key");
+			System.out.print("Key--");
+			gameState.updateLastPath(path);
 			return path;
 		}
-		System.out.println("doing explore");
-		return exploreStrategy.findPath(gameState);
+		System.out.print("Explore--");
+		path = exploreStrategy.findPath(gameState);
+		gameState.updateLastPath(path);
+		return path;
 	}
 }

@@ -9,40 +9,46 @@ import utilities.Coordinate;
 import world.WorldSpatial;
 
 public class KeyStrategy implements PathStrategy{
+	
+	private final int FIXED_LAVA_COST = 3000;
+	private final int FIXED_GRASS_COST = 120;
+	private final int LOW_HEALTH = 60;
+	private final int HIGH_HEALTH = 98;
+
+	/**
+	 * returns a path when we know where the next key is
+	 */
 	public ArrayList<Coordinate> findPath(GameState gameState){
 		Coordinate dest = findDest(gameState);
+		ArrayList<Coordinate> path;
 		if (dest == null || dest.equals(gameState.carState.position)){
 			return null;
 		}
-		// search
-		ArrayList<Coordinate> path;
 		
 		// include logic for changing costs depending on current key and other squares etc.
-		float lavaCost = 3000 - gameState.carState.health;
+		float lavaCost = FIXED_LAVA_COST - gameState.carState.health;
 		float healthCost = gameState.carState.health;
-		float grassCost = 120;
-		path = Search.findPath(gameState.carState.position, dest, lavaCost, healthCost, grassCost, gameState);
-
-		if (willSurvive(path, gameState)){
+		path = Search.findPath(gameState.carState.position, dest, lavaCost, healthCost, FIXED_GRASS_COST, gameState);
+		// if we should go for key return path to key
+		if (goForKey(path, gameState)){
 			return path;
 		}
-		//go to closest health
+		//if we shouldn't go for key check that the path to health has less lava on it 
 		else {
 			Coordinate nearestHealth = getNearestHealth(gameState);
 			ArrayList<Coordinate> alternatePath = null;
 			if(nearestHealth == null) {
 				return path;
 			}
+			//dest is current position
 			if (nearestHealth.equals(gameState.carState.position)){
-				//dest is current position
 				alternatePath = new ArrayList<>();
 				alternatePath.add(nearestHealth);
-				return alternatePath;
-				
+				return alternatePath;	
 			}
 			
-			alternatePath = Search.findPath(gameState.carState.position, nearestHealth, lavaCost, healthCost, grassCost, gameState);
-			if(lavaPathCost(alternatePath, gameState) > lavaPathCost(path, gameState)) {
+			alternatePath = Search.findPath(gameState.carState.position, nearestHealth, lavaCost, healthCost, FIXED_GRASS_COST, gameState);
+			if(lavaCrossed(alternatePath, gameState) > lavaCrossed(path, gameState)) {
 				return path;
 			}
 			
@@ -50,34 +56,43 @@ public class KeyStrategy implements PathStrategy{
 		}
 	}
 	
+	/**
+	 * Returns the coordinate of the next key and null if we haven't found key yet
+	 */
 	public Coordinate findDest(GameState gameState){
 		Coordinate dest = null;
+		// Searches through explored map
 		for (Coordinate c: gameState.exploredMap.keySet()){
 			MapTile t = gameState.exploredMap.get(c);
-				if (gameState.currKey == 1){
-					if (t.getType().equals(MapTile.Type.FINISH)){
+			//if found all keys look for finish	
+			if (gameState.currKey == 1){
+				if (t.getType().equals(MapTile.Type.FINISH)){
+					return c;
+				}
+			}
+			// otherwise looking in lava traps for keys
+			else{
+				if (t instanceof LavaTrap){
+					if (((LavaTrap) t).getKey() == (gameState.currKey - 1)){
 						return c;
 					}
 				}
-				else{
-					if (t instanceof LavaTrap){
-						if (((LavaTrap) t).getKey() > 0){
-							System.out.print("in exploredMap key is: ");
-							System.out.println(((LavaTrap) t).getKey());
-						}
-						if (((LavaTrap) t).getKey() == (gameState.currKey - 1)){
-							return c;
-						}
-					}
-				}
 			}
+		}
 		return dest;
 	}
 	
-	private Boolean willSurvive(ArrayList<Coordinate> path, GameState gameState){
-		return (gameState.carState.health > 60 && (gameState.carState.health > 99 || !(gameState.combinedMap.get(gameState.carState.position) instanceof HealthTrap)));
+	/**
+	 * Uses heuristics to determine when to go for key, second part of statement tells you to stay on health if already there
+	 */
+	private Boolean goForKey(ArrayList<Coordinate> path, GameState gameState){
+		return (gameState.carState.health > LOW_HEALTH && (gameState.carState.health > HIGH_HEALTH || !(gameState.combinedMap.get(gameState.carState.position) instanceof HealthTrap)));
 	}
-	private float lavaPathCost(ArrayList<Coordinate> path, GameState gameState) {
+	
+	/**
+	 * checks through the map to see how many tiles in the path are lava and returns that number
+	 */
+	private float lavaCrossed(ArrayList<Coordinate> path, GameState gameState) {
 		int lavaCrossed = 0;
 		for(Coordinate c: path){
 			if(gameState.combinedMap.get(c) instanceof LavaTrap) {
@@ -87,8 +102,10 @@ public class KeyStrategy implements PathStrategy{
 		return lavaCrossed;
 	}
 	
+	/** 
+	 * uses a variation of a breadth first search to return the nearest health tile
+	 */
 	private Coordinate getNearestHealth(GameState gameState) {
-		Coordinate bestHealth = null;
 		ArrayList <Coordinate> reachable = new ArrayList<>();
 		ArrayList <Coordinate> q = new ArrayList<>();
 		Coordinate curr;
@@ -113,21 +130,20 @@ public class KeyStrategy implements PathStrategy{
 							newCoordinate = new Coordinate(curr.x, curr.y - 1);
 							break;
 						default:
-							System.out.println("not a direction");	
-							}
+					}
 					
 					MapTile newMapTile = gameState.combinedMap.get(newCoordinate);
+					//if the map tile isn't a wall then add it to arraylist to explore later
 					if(newMapTile != null && newMapTile.getType()!= MapTile.Type.WALL ){
-						q.add(0, newCoordinate);
+						q.add(newCoordinate);
+						// if its a health tile then return immediately
 						if(newMapTile != null && newMapTile instanceof HealthTrap){
 							return newCoordinate;
 						}
-					}
-					
+					}	
 				}			
 			}
 		}
-		
-		return bestHealth;
+		return null; //haven't found any health
 	}
 }

@@ -6,6 +6,9 @@ import utilities.Coordinate;
 
 public interface PathStrategy {
 	
+	/**
+	 * returns the path we want to take as an array list of coordinates
+	 */
 	public abstract ArrayList<Coordinate>  findPath(GameState gameState);
 
 }

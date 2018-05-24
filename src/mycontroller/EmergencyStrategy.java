@@ -9,25 +9,31 @@ import world.WorldSpatial;
 public class EmergencyStrategy implements PathStrategy{
 	private final int DELTA_COUNT = 10;
 	private int emergencyDeltaCount = 0;
+	
+	/**
+	 * determines whether we are in an emergency situation and returns a path to resolve emergency
+	 */
 	public ArrayList<Coordinate> findPath(GameState gameState){
 		ArrayList<Coordinate> path = null;
+		
+		//not moving, not currently in an emergency cycle, probably stuck, initiate emergency
 		if (isZero(gameState.carState.speed) && isZero(gameState.carState.previousSpeed) && emergencyDeltaCount==0
 				&& !gameState.lastPath.get(gameState.lastPath.size()-1).equals(gameState.carState.position)){
-			//not moving, not currently in an emergency cycle, probably stuck, initiate emergency
 			gameState.isEmergency = true;
 		}
+		//cycle complete end emergency
 		if (emergencyDeltaCount>DELTA_COUNT){
-			//cycle complete end emergency
 			gameState.isEmergency = false;
 			emergencyDeltaCount = 0;
 		}
-		if(gameState.isEmergency){
-			
+		//continue emergency escape procedure 
+		if(gameState.isEmergency){	
 			path = new ArrayList<>();
 			Coordinate curr = gameState.carState.position;
 			int newX = curr.x;
 			int newY = curr.y;
 			Coordinate lastDest = gameState.lastPath.get(0);
+			// check each direction to see which is the wall we're crashing into
 			for (WorldSpatial.Direction d: WorldSpatial.Direction.values()){
 				
 				Coordinate newCoordinate = null;
@@ -47,14 +53,15 @@ public class EmergencyStrategy implements PathStrategy{
 					default:
 						System.out.println("not a direction");	
 						}
+				// Calculates where the "opposite" square to the one we're stuck on is 
 				if (gameState.combinedMap.get(newCoordinate).getType().equals(MapTile.Type.WALL)){
 					newX = 2*newX - newCoordinate.x;
 					newY = 2*newY - newCoordinate.y;
 					break;
 				}
 			}
+			//no walls were found in cardinal directions need to check corners too
 			if (newX==curr.x && newY==curr.y){
-				//no walls were found in cardinal directions need to check corners too
 				for (WorldSpatial.Direction d: WorldSpatial.Direction.values()){
 					Coordinate newCoordinate = null;
 					switch(d) {
@@ -77,6 +84,7 @@ public class EmergencyStrategy implements PathStrategy{
 						default:
 							System.out.println("not a direction");	
 							}
+					// Calculates where the "opposite" square to the one we're stuck on is 
 					if (gameState.combinedMap.get(newCoordinate).getType().equals(MapTile.Type.WALL)){
 						newX = 2*newX - newCoordinate.x;
 						newY = 2*newY - newCoordinate.y;
@@ -87,14 +95,17 @@ public class EmergencyStrategy implements PathStrategy{
 
 			newX = 2*curr.x - lastDest.x;
 			newY = 2*curr.y - lastDest.y;
-			path.add(new Coordinate(newX, newY));
+			path.add(new Coordinate(newX, newY)); // Sets this "opposite" square as destination
 			emergencyDeltaCount++;
 			return path;
 		}
 		return path;
 	}
 	
-	private boolean isZero(double speed){
-	    return speed >= -0.01 && speed <= 0.01;
+	/**
+	 * tests whether the speed is currently zero, accounting for floating point inaccuracies 
+	 */
+	private boolean isZero(float speed){
+	    return speed <= 0.01;
 	}
 }

@@ -26,10 +26,6 @@ public class AStarSearch {
 			closedHashMap.put(curr.getCoordinate(), curr);
 			if (curr.getCoordinate().equals(dest)){
 				// found dest
-				System.out.print("dest: ");
-				System.out.print(curr.getCoordinate());
-				System.out.print("--Cost: ");
-				System.out.print(curr.getCost());
 				return curr.tracePath();
 			}
 			

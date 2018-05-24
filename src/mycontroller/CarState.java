@@ -1,7 +1,5 @@
 package mycontroller;
 
-import java.util.ArrayList;
-
 import utilities.Coordinate;
 
 public class CarState {
@@ -11,7 +9,9 @@ public class CarState {
 	float health;
 	float previousSpeed;
 	
-	
+	/**
+	 * Constructor instialises the car state
+	 */
 	public CarState(String position, float angle, float health, float speed){
 		this.position = new Coordinate(position);
 		this.angle = angle;
@@ -20,6 +20,9 @@ public class CarState {
 		this.previousSpeed = -1;
 	}
 	
+	/**
+	 * updates the cars state after each time step
+	 */
 	public void updateCarState(String position, float angle, float speed, float health){
 		this.position = new Coordinate(position);
 		this.angle = angle;

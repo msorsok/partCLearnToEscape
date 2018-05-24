@@ -2,25 +2,20 @@ package mycontroller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import controller.CarController;
-import tiles.HealthTrap;
-import tiles.LavaTrap;
 import tiles.MapTile;
 import utilities.Coordinate;
 import world.Car;
-import world.World;
-import world.WorldSpatial;
-
 
 public class MyAIController extends CarController{
 	
-	// Car Speed to move at
-	private GameState gameState;
-	private PathFinder pathFinder;
-	private CarMover carMover;
+	private GameState gameState; // stores the state of the game
+	private PathFinder pathFinder; // creates paths for the car to follow
+	private CarMover carMover; // creates commands to move the car
 	
-	
+	/**
+	 * Constructor instialises the MyAIController object
+	 */
 	public MyAIController(Car car) {
 		super(car);
 		this.pathFinder = new PathFinder();
@@ -29,16 +24,15 @@ public class MyAIController extends CarController{
 	}
 
 	@Override
+	/**
+	 * makes updates to the cars movement after each time step of the simulation
+	 */
 	public void update(float delta) {
 		HashMap<Coordinate, MapTile> currentView = getView();
 		gameState.updateGameState(currentView, getPosition(), getAngle(), getSpeed(), getHealth(), getKey());
 		ArrayList<Coordinate> path = pathFinder.findPath(gameState);
-		System.out.println(gameState.combinedMap.get(path.get(0)).getType());
-		System.out.print("path: ");
-		System.out.println(path);
 		ArrayList<Boolean> instructions = carMover.getInstructions(path, gameState);
-		//System.out.println(instructions);
-
+		// Checks whether our instructions have an acceleration command to implement
 		if (instructions.get(1) == null){
 		}
 		else if (instructions.get(1)){
@@ -48,6 +42,7 @@ public class MyAIController extends CarController{
 			turnLeft(delta);
 		}
 		
+		// Checks whether our instructions have a turning command to implement
 		if (instructions.get(0) == null){
 		}
 		else if(instructions.get(0)){
@@ -55,7 +50,6 @@ public class MyAIController extends CarController{
 		}
 		else{
 				applyReverseAcceleration();
-
 		}
 	}
 }

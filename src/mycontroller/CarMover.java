@@ -21,7 +21,7 @@ public class CarMover {
 			return instructions;
 		}
 		ArrayList<Float> adjustedDest  = adjustAwayFromWall(firstDest, gameState);
-		gameState.maxSpeed = PhysicsCalculations.findMaxSpeed(gameState.carState.position.x, gameState.carState.position.y,
+		float maxSpeed = PhysicsCalculations.findMaxSpeed(gameState.carState.position.x, gameState.carState.position.y,
 				adjustedDest.get(0), adjustedDest.get(1), gameState.carState.angle);
 		instructions.add(PhysicsCalculations.acceleratingForward(gameState.carState.position.x, gameState.carState.position.y,
 				adjustedDest.get(0), adjustedDest.get(1), gameState.carState.angle, gameState.isEmergency));
@@ -35,7 +35,7 @@ public class CarMover {
 		if(gameState.combinedMap.get(path.get(path.size()-1)) instanceof HealthTrap && path.size() < 3 && gameState.carState.speed > 0.5) {
 			goingForHealth = true;
 		}
-		if ((( !goingForHealth && gameState.carState.speed < gameState.maxSpeed) || gameState.combinedMap.get(gameState.carState.position) instanceof LavaTrap)){
+		if ((( !goingForHealth && gameState.carState.speed < maxSpeed) || gameState.combinedMap.get(gameState.carState.position) instanceof LavaTrap)){
 			
 		}
 		else {

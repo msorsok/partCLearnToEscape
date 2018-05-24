@@ -21,7 +21,7 @@ public class KeyStrategy implements PathStrategy{
 		float lavaCost = 3000 - gameState.carState.health;
 		float healthCost = gameState.carState.health;
 		float grassCost = 120;
-		path = AStarSearch.findPath(gameState.carState.position, dest, lavaCost, healthCost, grassCost, gameState);
+		path = Search.findPath(gameState.carState.position, dest, lavaCost, healthCost, grassCost, gameState);
 
 		if (willSurvive(path, gameState)){
 			return path;
@@ -41,7 +41,7 @@ public class KeyStrategy implements PathStrategy{
 				
 			}
 			
-			alternatePath = AStarSearch.findPath(gameState.carState.position, nearestHealth, lavaCost, healthCost, grassCost, gameState);
+			alternatePath = Search.findPath(gameState.carState.position, nearestHealth, lavaCost, healthCost, grassCost, gameState);
 			if(lavaPathCost(alternatePath, gameState) > lavaPathCost(path, gameState)) {
 				return path;
 			}
@@ -84,7 +84,7 @@ public class KeyStrategy implements PathStrategy{
 				lavaCrossed ++;
 			}
 		}
-		return lavaCrossed/gameState.maxSpeed * LavaTrap.HealthDelta;
+		return lavaCrossed;
 	}
 	
 	private Coordinate getNearestHealth(GameState gameState) {

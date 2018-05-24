@@ -12,15 +12,13 @@ public class GameState {
 	HashMap<Coordinate, MapTile> exploredMap;
 	HashMap<Coordinate, MapTile> combinedMap;
 	int currKey;
-	float maxSpeed;
 	ArrayList<Coordinate> lastPath;
 	boolean isEmergency;
 	
-	public GameState(String position, float angle, float speed, float health, int currKey, float maxSpeed){
+	public GameState(String position, float angle, float speed, float health, int currKey){
 		this.carState = new CarState(position, angle, health, speed);
 		this.currKey = currKey;
 		isEmergency = false;
-		this.maxSpeed = maxSpeed;
 		this.exploredMap = new HashMap<>();
 		this.combinedMap = new HashMap<>();
 		for (Coordinate c: World.getMap().keySet()){

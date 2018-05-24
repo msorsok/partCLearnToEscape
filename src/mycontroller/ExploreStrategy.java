@@ -29,7 +29,7 @@ public class ExploreStrategy implements PathStrategy{
 		float lavaCost = 3000 - gameState.carState.health;
 		float healthCost = gameState.carState.health;
 		float grassCost = 120;
-		path = AStarSearch.findPath(gameState.carState.position, dest, lavaCost, healthCost, grassCost, gameState);
+		path = Search.findPath(gameState.carState.position, dest, lavaCost, healthCost, grassCost, gameState);
 		
 		return path;
 	}

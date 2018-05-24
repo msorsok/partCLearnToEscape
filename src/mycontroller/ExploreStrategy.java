@@ -11,7 +11,7 @@ import world.World;
 import world.WorldSpatial;
 
 public class ExploreStrategy implements PathStrategy{
-	private final int unseenWeight = 1;
+	private final int unseenWeight = 5;
 	private final int distanceWeight = -1;
 	
 	

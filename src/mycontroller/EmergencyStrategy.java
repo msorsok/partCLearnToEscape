@@ -94,7 +94,7 @@ public class EmergencyStrategy implements PathStrategy{
 		return path;
 	}
 	
-	public static boolean isZero(double speed){
+	private boolean isZero(double speed){
 	    return speed >= -0.01 && speed <= 0.01;
 	}
 }

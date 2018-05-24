@@ -11,7 +11,7 @@ import world.World;
 import world.WorldSpatial;
 
 public class ExploreStrategy implements PathStrategy{
-	private final int unseenWeight = 5;
+	private final int unseenWeight = 1;
 	private final int distanceWeight = -1;
 	
 	
@@ -69,7 +69,7 @@ public class ExploreStrategy implements PathStrategy{
 		}
 		else if(getLava(dest, gameState) > 1 && unseen > 0) {
 			// tiles near lava are worth 5 extra unseens
-			unseen+=5;
+			unseen+=100;
 		}
 		totalUtility += unseenWeight * unseen;
 		float distance = getManhattanDistance(gameState.carState.position, dest);
@@ -86,15 +86,13 @@ public class ExploreStrategy implements PathStrategy{
 			
 			if(gameState.carState.health < 50){
 				totalUtility+=10000;
+				// Penalise distance more so we go to closest health tile
 				totalUtility += 1000*(distanceWeight * distance);
 			}
 			else if(gameState.combinedMap.get(gameState.carState.position) instanceof HealthTrap && gameState.carState.health < 95) {
+				//currently on health tile may as well stay
 				totalUtility+=10000;
 			}
-			else{
-				totalUtility += 100 - gameState.carState.health;
-			}
-			
 		}
 		return totalUtility;
 	}

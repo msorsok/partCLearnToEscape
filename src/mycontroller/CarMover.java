@@ -21,6 +21,8 @@ public class CarMover {
 			return instructions;
 		}
 		ArrayList<Float> adjustedDest  = adjustAwayFromWall(firstDest, gameState);
+		gameState.maxSpeed = PhysicsCalculations.findMaxSpeed(gameState.carState.position.x, gameState.carState.position.y,
+				adjustedDest.get(0), adjustedDest.get(1), gameState.carState.angle);
 		instructions.add(PhysicsCalculations.acceleratingForward(gameState.carState.position.x, gameState.carState.position.y,
 				adjustedDest.get(0), adjustedDest.get(1), gameState.carState.angle, gameState.isEmergency));
 		instructions.add(PhysicsCalculations.getTurningRight(gameState.carState.position.x, gameState.carState.position.y,

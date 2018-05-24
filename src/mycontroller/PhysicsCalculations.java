@@ -1,6 +1,17 @@
 package mycontroller;
 
 public class PhysicsCalculations {
+	private static final float turningSpeed = 2f;
+	private static final float regularSpeed = 5f;
+	public static float findMaxSpeed(float srcX, float srcY, float destX, float destY, float travellingAngle){
+		float destAngle = getAngleToDest(destX, destY, srcX, srcY);
+		float currentAngle = travellingAngle;
+		float angleBetween = (destAngle - currentAngle + 360) % 360;
+		if (angleBetween>70 && angleBetween<290){
+			return turningSpeed;
+		}
+		return regularSpeed;
+	}
 	
 	/** 
 	 * From a given source to a given destination, calculates whether to turn right or left 

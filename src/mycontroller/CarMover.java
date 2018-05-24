@@ -14,9 +14,15 @@ public class CarMover {
 		ArrayList<Boolean> instructions = new ArrayList<>();
 		Coordinate firstDest = path.get(0);
 		if (path.get(0).equals(gameState.carState.position)){
-			instructions.add(null);
-			instructions.add(null);
-			return instructions;
+			if (isZero(gameState.carState.speed)){
+				instructions.add(null);
+				instructions.add(null);
+				return instructions;
+			}
+			else{
+				instructions.add(false);
+				instructions.add(null);				
+			}
 		}
 		ArrayList<Float> adjustedDest  = adjustAwayFromWall(firstDest, gameState);
 		instructions.add(PhysicsCalculations.acceleratingForward(gameState.carState.position.x, gameState.carState.position.y,
@@ -67,6 +73,9 @@ public class CarMover {
 		output.add(newX);
 		output.add(newY);
 		return output;	
+	}
+	public static boolean isZero(double speed){
+	    return speed >= -0.01 && speed <= 0.01;
 	}
 
 }

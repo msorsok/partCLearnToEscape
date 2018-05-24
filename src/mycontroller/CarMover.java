@@ -2,6 +2,8 @@ package mycontroller;
 
 import java.util.ArrayList;
 
+import tiles.HealthTrap;
+import tiles.LavaTrap;
 import tiles.MapTile;
 import utilities.Coordinate;
 import world.WorldSpatial;
@@ -22,10 +24,24 @@ public class CarMover {
 		instructions.add(PhysicsCalculations.acceleratingForward(gameState.carState.position.x, gameState.carState.position.y,
 				adjustedDest.get(0), adjustedDest.get(1), gameState.carState.angle, gameState.isEmergency));
 		instructions.add(PhysicsCalculations.getTurningRight(gameState.carState.position.x, gameState.carState.position.y,
-				adjustedDest.get(0), adjustedDest.get(1), gameState.carState.angle, this.previousAccelerateForward));
+				adjustedDest.get(0), adjustedDest.get(1), gameState.carState.angle, instructions.get(0)));
 		previousAccelerateForward = instructions.get(0);
 		previousTurnRight = instructions.get(1);
 		//System.out.println(instructions);
+		// If the car is trying ot pick up health then it should slow down
+		boolean goingForHealth = false;
+		if(gameState.combinedMap.get(path.get(path.size()-1)) instanceof HealthTrap && path.size() < 3 && gameState.carState.speed > 0.5) {
+			goingForHealth = true;
+		}
+		if ((( !goingForHealth && gameState.carState.speed < gameState.maxSpeed) || gameState.combinedMap.get(gameState.carState.position) instanceof LavaTrap)){
+			
+		}
+		else {
+			ArrayList<Boolean> newInstructions = new ArrayList<>();
+			newInstructions.add(false);
+			newInstructions.add(instructions.get(1));
+			return newInstructions;
+		}
 		return instructions;
 	}
 	

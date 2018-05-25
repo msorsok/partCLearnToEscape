@@ -1,3 +1,4 @@
+//group 118 Ben Burgess, Lucas Nash, and Mina Sorsok
 package mycontroller;
 
 import java.util.ArrayList;
@@ -102,6 +103,9 @@ public class AStarSearch {
 								successors.add(new AStarNode(newCoordinate, curr, curr.getCostFromStart() + healthCost, curr.getDest()));
 								break;
 							case "grass":
+								successors.add(new AStarNode(newCoordinate, curr, curr.getCostFromStart() + grassCost, curr.getDest()));
+								break;
+							case "mud":
 								successors.add(new AStarNode(newCoordinate, curr, curr.getCostFromStart() + grassCost, curr.getDest()));
 								break;
 							}

@@ -1,3 +1,4 @@
+//group 118 Ben Burgess, Lucas Nash, and Mina Sorsok
 package mycontroller;
 
 import java.util.ArrayList;

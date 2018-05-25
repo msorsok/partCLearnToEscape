@@ -21,6 +21,7 @@ public class AStarNode{
 		this.dest = dest;
 	}
 	
+	// used for ordering lists in ascending order of cost
 	public static Comparator<AStarNode> NodeComparator = new Comparator<AStarNode>() {
 		public int compare(AStarNode n1, AStarNode n2){
 			return (int)Math.round(n1.getCost() - n2.getCost());
@@ -32,13 +33,6 @@ public class AStarNode{
 	
 	public float getCost() {
 		return costFromStart + estimatedCostToGoal;
-	}
-
-	public int compareTo(Object other) {
-		double thisValue = this.getCost();
-		double otherValue = ((AStarNode)other).getCost();
-		double v = thisValue - otherValue;
-		return (v>0)?1:(v<0)?-1:0; // sign function
 	}
 
 	public float getEstimatedCost(AStarNode node){
@@ -57,7 +51,8 @@ public class AStarNode{
 	public Coordinate getDest(){
 		return this.dest;
 	}
-
+	
+	//find path from dest back to source, going from src->path
 	public ArrayList<Coordinate> tracePath(){
 		AStarNode curr = this;
 		ArrayList<Coordinate> path = new ArrayList<>();
